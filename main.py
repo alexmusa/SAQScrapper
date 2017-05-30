@@ -21,7 +21,7 @@ page = requests.get("https://www.saq.com/webapp/wcs/stores/servlet/AjaxProduitSe
 
 print(page.status_code)
 print(page.headers)
-#print(page.content)
+#print(page.text)
 print('\n')
 
 tree = html.fromstring(page.content)
@@ -37,9 +37,9 @@ tree = html.fromstring(page.content)
 ### Cette attribut href est l'url de la fiche produit.
 
 product_urls = tree.xpath("div[@id='resultatRecherche']"
-                  "/div[@class='wrapper-middle-rech']"
-                  "/div[@class='resultats_product']"
-                  "/div[@class='img']/a/@href")
+                          "/div[@class='wrapper-middle-rech']"
+                          "/div[@class='resultats_product']"
+                          "/div[@class='img']/a/@href")
 
 for url in product_urls:
     print(url)
@@ -49,12 +49,61 @@ page = requests.get(product_urls[0])
 
 print(page.status_code)
 print(page.headers)
-#print(page.content)
+# print(page.text)
 print('\n')
 
 tree = html.fromstring(page.content)
 
-product_urls = tree.xpath("div[@id='resultatRecherche']"
-                          "/div[@class='wrapper-middle-rech']"
-                          "/div[@class='resultats_product']"
-                          "/div[@class='img']/a/@href")
+# <html xml:lang="fr" lang="fr">
+#   <body onload="MM_preloadImages('/etc/designs/SAQ/images/header/menu-produits-o_fr.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_fr.png','/etc/designs/SAQ/images/header/menu-a-propos-o_fr.png','/etc/designs/SAQ/images/header/menu-produits-o_en.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_en.png','/etc/designs/SAQ/images/header/menu-a-propos-o_en.png')">
+#       <div id="content" class="produit">
+#           <div class="parbase wcscontainer">
+#               <div style="overflow: hidden; " class="wcs-container">
+#                   <div class="product-page">
+#                       <div class="product-bloc-fiche">
+#                           <div class="product-page-left">
+#                               <div class="product-description">
+### Contient la description courte en haut de page.
+
+
+# <html xml:lang="fr" lang="fr">
+#   <body onload="MM_preloadImages('/etc/designs/SAQ/images/header/menu-produits-o_fr.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_fr.png','/etc/designs/SAQ/images/header/menu-a-propos-o_fr.png','/etc/designs/SAQ/images/header/menu-produits-o_en.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_en.png','/etc/designs/SAQ/images/header/menu-a-propos-o_en.png')">
+#       <div id="content" class="produit">
+#           <div class="parbase wcscontainer">
+#               <div style="overflow: hidden; " class="wcs-container">
+#                   <div class="product-page">
+#                       <div class="product-bloc-fiche">
+#                           <div class="product-page-left">
+#                               <div class="product-page-onglet-wrapper">
+#                                   <div id="product-page-tab-box">
+#                                       <div class="tabsbody">
+#                                           <div id="details" class="tabspanel" role="tabpanel" aria-hidden="true" aria-labelledby="tab-details">
+### Contient la description détaillé en bas de page.
+
+
+
+description = tree.xpath("html/body/div[@class='bg']"
+                         "/div[@id='content' and @class='produit']"
+                         "/div[@class='parbase wcscontainer']"
+                         "/div[@class='wcs-container']"
+                         "/div[@class='product-page']"
+                         "/div[@class='product-bloc-fiche']"
+                         "/div[@class='product-page-left']"
+                         "/div[@class='product-description']/@class")
+
+detailed_infos = tree.xpath("html/body/div[@class='bg']"
+                            "/div[@id='content' and @class='produit']"
+                            "/div[@class='parbase wcscontainer']"
+                            "/div[@class='wcs-container']"
+                            "/div[@class='product-page']"
+                            "/div[@class='product-bloc-fiche']"
+                            "/div[@class='product-page-left']"
+                            "/div[@class='product-page-onglet-wrapper']"
+                            "/div[@id='product-page-tab-box']"
+                            "/div[@class='tabsbody']"
+                            "/div[@id='details' and @class='tabspanel']/@class")
+print(description)
+print('\n')
+
+print(detailed_infos)
+print('\n')
