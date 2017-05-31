@@ -1,5 +1,7 @@
 from lxml import html
 import requests
+
+#### Parsing de la page de recherche ####
 page = requests.get("https://www.saq.com/webapp/wcs/stores/servlet/AjaxProduitSearchResultView?"
                     "facetSelectionCommandName=SearchDisplay"
                     "&searchType="
@@ -36,6 +38,7 @@ tree = html.fromstring(page.content)
 #               <a id = "productDisplayImageLink_873257" href = [...]
 ### Cette attribut href est l'url de la fiche produit.
 
+# Peut aussi être raccourci à l'image des expressions suivantes
 product_urls = tree.xpath("div[@id='resultatRecherche']"
                           "/div[@class='wrapper-middle-rech']"
                           "/div[@class='resultats_product']"
@@ -45,6 +48,7 @@ for url in product_urls:
     print(url)
 print('\n')
 
+#### Parsing de la page du produit ####
 page = requests.get(product_urls[0])
 
 print(page.status_code)
@@ -54,8 +58,8 @@ print('\n')
 
 tree = html.fromstring(page.content)
 
-# <html xml:lang="fr" lang="fr">
-#   <body onload="MM_preloadImages('/etc/designs/SAQ/images/header/menu-produits-o_fr.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_fr.png','/etc/designs/SAQ/images/header/menu-a-propos-o_fr.png','/etc/designs/SAQ/images/header/menu-produits-o_en.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_en.png','/etc/designs/SAQ/images/header/menu-a-propos-o_en.png')">
+# <body onload="MM_preloadImages('/etc/designs/SAQ/images/header/menu-produits-o_fr.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_fr.png','/etc/designs/SAQ/images/header/menu-a-propos-o_fr.png','/etc/designs/SAQ/images/header/menu-produits-o_en.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_en.png','/etc/designs/SAQ/images/header/menu-a-propos-o_en.png')">
+#   <div class="bg">
 #       <div id="content" class="produit">
 #           <div class="parbase wcscontainer">
 #               <div style="overflow: hidden; " class="wcs-container">
@@ -66,8 +70,8 @@ tree = html.fromstring(page.content)
 ### Contient la description courte en haut de page.
 
 
-# <html xml:lang="fr" lang="fr">
-#   <body onload="MM_preloadImages('/etc/designs/SAQ/images/header/menu-produits-o_fr.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_fr.png','/etc/designs/SAQ/images/header/menu-a-propos-o_fr.png','/etc/designs/SAQ/images/header/menu-produits-o_en.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_en.png','/etc/designs/SAQ/images/header/menu-a-propos-o_en.png')">
+# <body onload="MM_preloadImages('/etc/designs/SAQ/images/header/menu-produits-o_fr.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_fr.png','/etc/designs/SAQ/images/header/menu-a-propos-o_fr.png','/etc/designs/SAQ/images/header/menu-produits-o_en.png','/etc/designs/SAQ/images/header/menu-conseils-et-accords-o_en.png','/etc/designs/SAQ/images/header/menu-a-propos-o_en.png')">
+#   <div class="bg">
 #       <div id="content" class="produit">
 #           <div class="parbase wcscontainer">
 #               <div style="overflow: hidden; " class="wcs-container">
@@ -81,17 +85,17 @@ tree = html.fromstring(page.content)
 ### Contient la description détaillé en bas de page.
 
 
-
-description = tree.xpath("html/body/div[@class='bg']"
+# "//div[@class='product-description']/*" seul fait l'affaire
+description = tree.xpath("body/div[@class='bg']"
                          "/div[@id='content' and @class='produit']"
                          "/div[@class='parbase wcscontainer']"
                          "/div[@class='wcs-container']"
                          "/div[@class='product-page']"
                          "/div[@class='product-bloc-fiche']"
                          "/div[@class='product-page-left']"
-                         "/div[@class='product-description']/@class")
-
-detailed_infos = tree.xpath("html/body/div[@class='bg']"
+                         "/div[@class='product-description']")[0]
+# de même "//div[@id='details' and @class='tabspanel']//li" seul fait l'affaire
+detailed_infos = tree.xpath("body/div[@class='bg']"
                             "/div[@id='content' and @class='produit']"
                             "/div[@class='parbase wcscontainer']"
                             "/div[@class='wcs-container']"
@@ -101,9 +105,27 @@ detailed_infos = tree.xpath("html/body/div[@class='bg']"
                             "/div[@class='product-page-onglet-wrapper']"
                             "/div[@id='product-page-tab-box']"
                             "/div[@class='tabsbody']"
-                            "/div[@id='details' and @class='tabspanel']/@class")
-print(description)
+                            "/div[@id='details' and @class='tabspanel']//li")
+
+### Création du produit ###
+# Il est encore necessaire de retirer des espaces vides et traiter les caractères spéciaux.
+# TODO: implémenter une fonction filtrant les éléments vides des listes retournées par xpath()
+code_SAQ = description.xpath('//div[@class="product-description-row2"]/text()')[1].strip()
+code_CUP = description.xpath('//div[@class="product-description-row2"]/text()')[2].strip()
+product_name = description.xpath('//h1[@class="product-description-title"]/text()')[0]
+product_type = description.xpath('//div[@class="product-description-title-type"]/text()')[0].strip().split(',')[0]
+product_blabla = description.xpath('//div[@class="product-description-row5"]/p/text()')[0]
+
+print(code_SAQ)
+print(code_CUP)
+print(product_name)
+print(product_type)
+print(product_blabla)
 print('\n')
 
-print(detailed_infos)
-print('\n')
+# Titre des caractéristiques détaillées //div[@id='details' and @class='tabspanel']//li/div[@class="left"]/span/text()
+# Caractéristiques détaillées //div[@id='details' and @class='tabspanel']//li/div[@class="right"]/text()
+# Il faut néanmoins vérifier que la caractéristique n'est pas un tableau :
+# (//div[@id='details' and @class='tabspanel']//li/div[@class="right"])[6]/*/name() == "table"
+# Auquel cas la traité différemment
+
