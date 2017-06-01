@@ -1,4 +1,8 @@
+"""
+Module parsant les pages du site de la SAQ.
+"""
 from lxml import html
+from product import *
 import json
 
 def is_last_searchpage( page ):
@@ -32,9 +36,6 @@ def parse_products_urls( page ):
                              "/div[@class='wrapper-middle-rech']"
                              "/div[@class='resultats_product']"
                              "/div[@class='img']/a/@href")
-
-   for url in product_urls:
-       print(url)
 
    return product_urls
 
@@ -107,14 +108,9 @@ def parse_product( page ):
     code_CUP = description.xpath('//div[@class="product-description-row2"]/text()')[2].strip()
     product_name = description.xpath('//h1[@class="product-description-title"]/text()')[0]
     product_type = description.xpath('//div[@class="product-description-title-type"]/text()')[0].strip().split(',')[0]
-    product_blabla = description.xpath('//div[@class="product-description-row5"]/p/text()')
+    paragraphe = description.xpath('//div[@class="product-description-row5"]/p/text()')
 
-    print("Code SAQ : " + code_SAQ)
-    print("Code CUP : " + code_CUP)
-    print("Nom : " + product_name)
-    print("Type : " + product_type)
-    print("Blabla : " + str(product_blabla))
-    print('-------------------------')
+    product = Product(code_SAQ, code_CUP, product_name, product_type, paragraphe)
 
     # Titre des caractéristiques détaillées
     # //div[@id='details' and @class='tabspanel']//li/div[@class="left"]/span/text()
@@ -134,5 +130,7 @@ def parse_product( page ):
             for element in info.xpath('div[@class="right"]/table/tr'):
                 table.append([element.xpath('td[@class="col1"]/text()'), element.xpath('td[@class="col2"]/text()')])
             value = json.dumps(table)
-        print(name + " : " + str(value))
-    return
+
+        product.add_info([name, value])
+
+    return product
