@@ -1,4 +1,5 @@
 from lxml import html
+import json
 import requests
 
 #### Parsing de la page de recherche ####
@@ -116,11 +117,11 @@ product_name = description.xpath('//h1[@class="product-description-title"]/text(
 product_type = description.xpath('//div[@class="product-description-title-type"]/text()')[0].strip().split(',')[0]
 product_blabla = description.xpath('//div[@class="product-description-row5"]/p/text()')[0]
 
-print("Code SAQ :" + code_SAQ)
-print("Code CUP :" + code_CUP)
-print("Nom :" + product_name)
-print("Type :" + product_type)
-print("Blabla :" + product_blabla)
+print("Code SAQ : " + code_SAQ)
+print("Code CUP : " + code_CUP)
+print("Nom : " + product_name)
+print("Type : " + product_type)
+print("Blabla : " + product_blabla)
 print('-------------------------')
 
 # Titre des caractéristiques détaillées //div[@id='details' and @class='tabspanel']//li/div[@class="left"]/span/text()
@@ -134,7 +135,9 @@ for info in detailed_infos:
     if(all(element.tag != 'table' for element in info.xpath('div[@class="right"]/*'))):
         value = info.xpath('div[@class="right"]/text()')[0].strip()
     else:
-        value = "C'est un tableau"
-
-    print(name + " : " + value)
+        table = []
+        for element in info.xpath('div[@class="right"]/table/tr'):
+            table.append([element.xpath('td[@class="col1"]/text()'), element.xpath('td[@class="col2"]/text()')])
+        value = json.dumps(table)
+    print(name + " : " + str(value))
 print('\n')
