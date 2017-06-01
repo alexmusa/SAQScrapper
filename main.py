@@ -6,7 +6,7 @@ from parsing import *
 from database import *
 
 if __name__ == '__main__':
-    searchpage = retrieve_searchpage("0", "20")
+    searchpage = retrieve_searchpage("20", "40")
     product_urls = parse_products_urls(searchpage)
 
     for url in product_urls:

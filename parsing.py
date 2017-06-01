@@ -123,7 +123,7 @@ def parse_product( page ):
 
     for info in detailed_infos:
         name = info.xpath('div[@class="left"]/span/text()')[0].strip()
-        if (all(element.tag != 'table' for element in info.xpath('div[@class="right"]/*'))):
+        if all(element.tag != 'table' for element in info.xpath('div[@class="right"]/*')):
             value = info.xpath('div[@class="right"]/text()')[0].strip()
         else:
             table = []
