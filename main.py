@@ -1,6 +1,25 @@
-import requests
-r = requests.get("https://www.saq.com/webapp/wcs/stores/servlet/AjaxProduitSearchResultView?facetSelectionCommandName=SearchDisplay&searchType=&originalSearchTerm=*&orderBy=1&categoryIdentifier=06&showOnly=product&langId=-2&beginIndex=40&metaData=YWRpX2YxOjA8TVRAU1A%2BYWRpX2Y5OjE%3D&pageSize=20&catalogId=50000&searchTerm=*&pageView=&facet=&pageNumber=3&categoryId=39919&storeId=20002")
+"""
+Programme récupérant l'information des pages du site de la SAQ.
+"""
+from scrapping import *
+from parsing import *
+from database import *
 
-print(r.status_code)
-print(r.headers)
-print(r.content)
+if __name__ == '__main__':
+    searchpage = retrieve_searchpage("0", "20")
+    product_urls = parse_products_urls(searchpage)
+
+    for url in product_urls:
+        print(url)
+
+    for i in range(3):
+        productpage = retrieve_productpage(product_urls[i])
+        product = parse_product(productpage)
+
+        print("Code SAQ : " + product.code_SAQ)
+        print("Code CUP : " + product.code_CUP)
+        print("Nom : " + product.name_)
+        print("Type : " + product.type_)
+        print('-------------------------')
+        for info in product.infos:
+            print(info[0] + " : " + info[1])
