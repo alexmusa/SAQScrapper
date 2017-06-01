@@ -116,12 +116,12 @@ product_name = description.xpath('//h1[@class="product-description-title"]/text(
 product_type = description.xpath('//div[@class="product-description-title-type"]/text()')[0].strip().split(',')[0]
 product_blabla = description.xpath('//div[@class="product-description-row5"]/p/text()')[0]
 
-print(code_SAQ)
-print(code_CUP)
-print(product_name)
-print(product_type)
-print(product_blabla)
-print('\n')
+print("Code SAQ :" + code_SAQ)
+print("Code CUP :" + code_CUP)
+print("Nom :" + product_name)
+print("Type :" + product_type)
+print("Blabla :" + product_blabla)
+print('-------------------------')
 
 # Titre des caractéristiques détaillées //div[@id='details' and @class='tabspanel']//li/div[@class="left"]/span/text()
 # Caractéristiques détaillées //div[@id='details' and @class='tabspanel']//li/div[@class="right"]/text()
@@ -129,3 +129,12 @@ print('\n')
 # (//div[@id='details' and @class='tabspanel']//li/div[@class="right"])[6]/*/name() == "table"
 # Auquel cas la traité différemment
 
+for info in detailed_infos:
+    name = info.xpath('div[@class="left"]/span/text()')[0].strip()
+    if(all(element.tag != 'table' for element in info.xpath('div[@class="right"]/*'))):
+        value = info.xpath('div[@class="right"]/text()')[0].strip()
+    else:
+        value = "C'est un tableau"
+
+    print(name + " : " + value)
+print('\n')
