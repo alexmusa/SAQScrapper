@@ -115,7 +115,8 @@ def parse_product( page ):
                         "/div[@class='product-bloc-fiche']"
                         "/div[@class='product-page-right']"
                         "/div[@class='product-add-to-cart-wrapper']"
-                        "//p[@class='price']/text()")[0].strip()
+                        "//p[contains(concat(' ', normalize-space(@class), ' '), ' price ')]"
+                        "/text()")[0].strip()
 
     ### Création du produit ###
     # Il est encore necessaire de retirer des espaces vides et traiter les caractères spéciaux.
