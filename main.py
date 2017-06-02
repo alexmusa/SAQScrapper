@@ -13,16 +13,24 @@ def jdefault(o):
 def save_position( position ):
     f = open('status', 'w')
     f.write(str(position))
+    f.close()
 
 def load_position():
     f = open('status', 'r')
     pos = int(f.readline())
+    f.close()
     return pos
 
-if __name__ == '__main__':
+def add_entry( product ):
     db_file = open('saq.json', 'a')
+    obj_json = json.dumps(product, default=jdefault)
+    db_file.write(obj_json + '\n')
+    db_file.close()
 
-    product_per_page = 20
+if __name__ == '__main__':
+
+
+    product_per_page = 100
     if os.path.exists("status"):
         position = load_position()
         current_page = position // product_per_page
@@ -45,12 +53,12 @@ if __name__ == '__main__':
             print("Code CUP : " + product.code_CUP)
             print("Nom : " + product.name_)
             print("Type : " + product.type_)
+            print("Price : " + product.price)
             print('-------------------------')
             for info in product.infos:
                 print(info[0] + " : " + str(info[1]))
 
-            obj_json = json.dumps(product, default=jdefault)
-            db_file.write(obj_json + '\n')
+            add_entry(product)
 
             position += 1
             save_position(position)

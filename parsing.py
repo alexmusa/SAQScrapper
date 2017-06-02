@@ -107,6 +107,16 @@ def parse_product( page ):
                                 "/div[@class='tabsbody']"
                                 "/div[@id='details' and @class='tabspanel']//li")
 
+    price = tree.xpath("body/div[@class='bg']"
+                        "/div[@id='content' and @class='produit']"
+                        "/div[@class='parbase wcscontainer']"
+                        "/div[@class='wcs-container']"
+                        "/div[@class='product-page']"
+                        "/div[@class='product-bloc-fiche']"
+                        "/div[@class='product-page-right']"
+                        "/div[@class='product-add-to-cart-wrapper']"
+                        "//p[@class='price']/text()")[0].strip()
+
     ### Création du produit ###
     # Il est encore necessaire de retirer des espaces vides et traiter les caractères spéciaux.
     # TODO: implémenter une fonction filtrant les éléments vides des listes retournées par xpath()
@@ -117,7 +127,7 @@ def parse_product( page ):
     product_type = description.xpath('//div[@class="product-description-title-type"]/text()')[0].strip().split(',')[0]
     paragraphe = description.xpath('//div[@class="product-description-row5"]/p/text()')
 
-    product = Product(code_SAQ, code_CUP, product_name, product_type, paragraphe)
+    product = Product(code_SAQ, code_CUP, product_name, product_type, price, paragraphe)
 
     # Titre des caractéristiques détaillées
     # //div[@id='details' and @class='tabspanel']//li/div[@class="left"]/span/text()
