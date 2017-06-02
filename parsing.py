@@ -3,11 +3,18 @@ Module parsant les pages du site de la SAQ.
 """
 from lxml import html
 from product import *
-import json
 
 def is_last_searchpage( page ):
+    tree = html.fromstring(page)
 
-    return
+    icon = tree.xpath("div[@class='wrapper-top-rech']"
+                       "/div[@class='PagerResultat']"
+                       "/a/*[@title='Page suivante']")
+
+    if icon:
+        return False
+    else:
+        return True
 
 
 def parse_products_urls( page ):
@@ -34,7 +41,7 @@ def parse_products_urls( page ):
    # Peut aussi être raccourci à l'image des expressions suivantes
    product_urls = tree.xpath("div[@id='resultatRecherche']"
                              "/div[@class='wrapper-middle-rech']"
-                             "/div[@class='resultats_product']"
+                             "/div[contains(concat(' ', normalize-space(@class), ' '), ' resultats_product ')]"
                              "/div[@class='img']/a/@href")
 
    return product_urls
@@ -129,7 +136,7 @@ def parse_product( page ):
             table = []
             for element in info.xpath('div[@class="right"]/table/tr'):
                 table.append([element.xpath('td[@class="col1"]/text()'), element.xpath('td[@class="col2"]/text()')])
-            value = json.dumps(table)
+            value = table
 
         product.add_info([name, value])
 

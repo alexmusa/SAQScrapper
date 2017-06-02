@@ -13,7 +13,7 @@ class Product:
         self.type_ = type_
         self.infos = []
         if paragraphe:
-            self.infos.append(["Paragraphe", str(paragraphe)])
+            self.infos.append(["Paragraphe", paragraphe])
 
     def add_info( self, info):
         self.infos.append(info)
