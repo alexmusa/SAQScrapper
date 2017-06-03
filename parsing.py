@@ -123,7 +123,10 @@ def parse_product( page ):
     # TODO: implémenter une fonction filtrant les éléments vides des listes retournées par xpath()
     # TODO: traiter le blabla à part car souvent non-défini
     code_SAQ = description.xpath('//div[@class="product-description-row2"]/text()')[1].strip()
-    code_CUP = description.xpath('//div[@class="product-description-row2"]/text()')[2].strip()
+    if len(description.xpath('//div[@class="product-description-row2"]/text()')) >= 3:
+        code_CUP = description.xpath('//div[@class="product-description-row2"]/text()')[2].strip()
+    else:
+        code_CUP = ""
     product_name = description.xpath('//h1[@class="product-description-title"]/text()')[0]
     product_type = description.xpath('//div[@class="product-description-title-type"]/text()')[0].strip().split(',')[0]
     paragraphe = description.xpath('//div[@class="product-description-row5"]/p/text()')
