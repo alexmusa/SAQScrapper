@@ -1,6 +1,8 @@
 import requests
+from time import sleep
+from random import randint
 
-def retrieve_searchpage( beginIndex, pageSize ):
+def retrieve_searchpage(beginIndex, pageSize ):
     '''Récupère une page de recherche du site de la SAQ.
 
     Keyword arguments:
@@ -10,12 +12,12 @@ def retrieve_searchpage( beginIndex, pageSize ):
     Returns: contenu de la page au format binaire
 
     '''
+    sleep(randint(2, 10))  # Pour éviter de trop nombreuse requêtes
     page = requests.get("https://www.saq.com/webapp/wcs/stores/servlet/AjaxProduitSearchResultView?"
                         "facetSelectionCommandName=SearchDisplay"
                         "&searchType="
                         "&originalSearchTerm=*"
                         "&orderBy=2" #Ordre de la recherche (1 : Pertinence, 2 : A-Z)
-                        "&categoryIdentifier=06"
                         "&showOnly=product"
                         "&langId=-2" #Langue (-2 : Français)
                         "&beginIndex=" + beginIndex + #Index de début des résultats
@@ -25,7 +27,6 @@ def retrieve_searchpage( beginIndex, pageSize ):
                         "&searchTerm=*" #Terme de la recherche
                         "&pageView=grid"
                         "&facet="
-                        "&categoryId=39919"
                         "&storeId=20002"
                         "&orderByType=1"
                         "&filterFacet=")
@@ -45,6 +46,7 @@ def retrieve_productpage( url ):
     Returns: contenu de la page au format binaire
 
     '''
+    sleep(randint(2, 10))  # Pour éviter de trop nombreuse requêtes
     page = requests.get(url)
 
     print(page.status_code)

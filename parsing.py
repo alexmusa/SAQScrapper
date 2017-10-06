@@ -3,11 +3,18 @@ Module parsant les pages du site de la SAQ.
 """
 from lxml import html
 from product import *
-import json
 
 def is_last_searchpage( page ):
+    tree = html.fromstring(page)
 
-    return
+    icon = tree.xpath("div[@class='wrapper-top-rech']"
+                       "/div[@class='PagerResultat']"
+                       "/a/*[@title='Page suivante']")
+
+    if icon:
+        return False
+    else:
+        return True
 
 
 def parse_products_urls( page ):
@@ -34,7 +41,7 @@ def parse_products_urls( page ):
    # Peut aussi être raccourci à l'image des expressions suivantes
    product_urls = tree.xpath("div[@id='resultatRecherche']"
                              "/div[@class='wrapper-middle-rech']"
-                             "/div[@class='resultats_product']"
+                             "/div[contains(concat(' ', normalize-space(@class), ' '), ' resultats_product ')]"
                              "/div[@class='img']/a/@href")
 
    return product_urls
@@ -100,17 +107,31 @@ def parse_product( page ):
                                 "/div[@class='tabsbody']"
                                 "/div[@id='details' and @class='tabspanel']//li")
 
+    price = tree.xpath("body/div[@class='bg']"
+                        "/div[@id='content' and @class='produit']"
+                        "/div[@class='parbase wcscontainer']"
+                        "/div[@class='wcs-container']"
+                        "/div[@class='product-page']"
+                        "/div[@class='product-bloc-fiche']"
+                        "/div[@class='product-page-right']"
+                        "/div[@class='product-add-to-cart-wrapper']"
+                        "//p[contains(concat(' ', normalize-space(@class), ' '), ' price ')]"
+                        "/text()")[0].strip()
+
     ### Création du produit ###
     # Il est encore necessaire de retirer des espaces vides et traiter les caractères spéciaux.
     # TODO: implémenter une fonction filtrant les éléments vides des listes retournées par xpath()
     # TODO: traiter le blabla à part car souvent non-défini
     code_SAQ = description.xpath('//div[@class="product-description-row2"]/text()')[1].strip()
-    code_CUP = description.xpath('//div[@class="product-description-row2"]/text()')[2].strip()
+    if len(description.xpath('//div[@class="product-description-row2"]/text()')) >= 3:
+        code_CUP = description.xpath('//div[@class="product-description-row2"]/text()')[2].strip()
+    else:
+        code_CUP = ""
     product_name = description.xpath('//h1[@class="product-description-title"]/text()')[0]
     product_type = description.xpath('//div[@class="product-description-title-type"]/text()')[0].strip().split(',')[0]
     paragraphe = description.xpath('//div[@class="product-description-row5"]/p/text()')
 
-    product = Product(code_SAQ, code_CUP, product_name, product_type, paragraphe)
+    product = Product(code_SAQ, code_CUP, product_name, product_type, price, paragraphe)
 
     # Titre des caractéristiques détaillées
     # //div[@id='details' and @class='tabspanel']//li/div[@class="left"]/span/text()
@@ -123,13 +144,13 @@ def parse_product( page ):
 
     for info in detailed_infos:
         name = info.xpath('div[@class="left"]/span/text()')[0].strip()
-        if (all(element.tag != 'table' for element in info.xpath('div[@class="right"]/*'))):
+        if all(element.tag != 'table' for element in info.xpath('div[@class="right"]/*')):
             value = info.xpath('div[@class="right"]/text()')[0].strip()
         else:
             table = []
             for element in info.xpath('div[@class="right"]/table/tr'):
                 table.append([element.xpath('td[@class="col1"]/text()'), element.xpath('td[@class="col2"]/text()')])
-            value = json.dumps(table)
+            value = table
 
         product.add_info([name, value])
 
