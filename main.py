@@ -25,7 +25,18 @@ if __name__ == '__main__':
         for i in range(position % product_per_page, len(product_urls)):
             url = product_urls[i]
             print(url)
+
+            # retries = 0
+            # success = False
+            # while(retries < 100 and not success):
+            #     try:
             productpage = retrieve_productpage(url)
+                # except Exception as e:
+                #     retries += 1
+                #     write_log(e)
+                # else:
+                #     success = True
+
             product = parse_product(productpage)
 
             print("Code SAQ : " + product.code_SAQ)
