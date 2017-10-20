@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../Docopt/.idea/Docopt.iml" filepath="$PROJECT_DIR$/../Docopt/.idea/Docopt.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/SAQScrapper.iml" filepath="$PROJECT_DIR$/.idea/SAQScrapper.iml" />
     </modules>
   </component>

@@ -17,6 +17,10 @@ def is_last_searchpage( page ):
         return True
 
 
+def parse_categories( page ):
+    # TODO: Implémenter le parsing des catégories
+    return None
+
 def parse_products_urls( page ):
    '''Parse une page de recherche du site de la SAQ pour en extraire les urls des produits.
 

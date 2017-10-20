@@ -2,6 +2,10 @@ import requests
 from time import sleep
 from random import randint
 
+def retrieve_categoriespage():
+    # TODO: Récupérer la page des catégories
+    return None
+
 def retrieve_searchpage(beginIndex, pageSize ):
     '''Récupère une page de recherche du site de la SAQ.
 
