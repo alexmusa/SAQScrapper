@@ -2,9 +2,7 @@ import requests
 from time import sleep
 from random import randint
 
-def retrieve_categoriespage():
-    # TODO: Récupérer la page des catégories
-    return None
+TIMEOUT = 100 # en secondes
 
 def retrieve_searchpage(beginIndex, pageSize ):
     '''Récupère une page de recherche du site de la SAQ.
@@ -33,12 +31,11 @@ def retrieve_searchpage(beginIndex, pageSize ):
                         "&facet="
                         "&storeId=20002"
                         "&orderByType=1"
-                        "&filterFacet=")
+                        "&filterFacet=",
+                        timeout=TIMEOUT)
 
-
-    print(page.status_code)
-    print(page.headers)
-
+    # print(page.status_code)
+    # print(page.headers)
     return page.content
 
 def retrieve_productpage( url ):
@@ -51,9 +48,8 @@ def retrieve_productpage( url ):
 
     '''
     sleep(randint(2, 10))  # Pour éviter de trop nombreuse requêtes
-    page = requests.get(url)
+    page = requests.get(url, timeout=TIMEOUT)
 
-    print(page.status_code)
-    print(page.headers)
-
+    #print(page.status_code)
+    #print(page.headers)
     return page.content

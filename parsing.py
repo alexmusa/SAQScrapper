@@ -1,6 +1,7 @@
 """
 Module parsant les pages du site de la SAQ.
 """
+import re
 from lxml import html
 from product import *
 
@@ -15,11 +16,6 @@ def is_last_searchpage( page ):
         return False
     else:
         return True
-
-
-def parse_categories( page ):
-    # TODO: Implémenter le parsing des catégories
-    return None
 
 def parse_products_urls( page ):
    '''Parse une page de recherche du site de la SAQ pour en extraire les urls des produits.
@@ -56,7 +52,7 @@ def parse_product( page ):
     Keyword arguments:
     page -- contenu de la page
 
-    Returns:
+    Returns: objet de class Product
 
     '''
     ##### Parsing de la page du produit #####
