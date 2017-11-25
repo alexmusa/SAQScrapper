@@ -46,14 +46,13 @@ if __name__ == '__main__':
             write_log(5, message)
             sys.exit(message)
 
-    current_page = Status.position // PRODUCTS_PER_PAGE
-
     Status.state = 'RUNNING'
     save_status()
 
     while True:
+        current_page = Status.position // PRODUCTS_PER_PAGE
         write_log(6, "Retrieving page #{0} ({1} per page)"
-                  .format(str(current_page * PRODUCTS_PER_PAGE), str(PRODUCTS_PER_PAGE)))
+                  .format(str(current_page), str(PRODUCTS_PER_PAGE)))
         essais = 0
         success = False
         while(not success):
