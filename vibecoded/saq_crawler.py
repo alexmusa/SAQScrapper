@@ -1,9 +1,23 @@
 import os
+import time
+import random
 import requests
 from lxml import html
 from urllib.parse import urlparse
 
 BASE_URL = "https://www.saq.com"
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/122.0.0.0 Safari/537.36"
+}
+
+def polite_sleep(min_delay=1.0, max_delay=2.5):
+    """Sleep for a random time between requests to avoid hammering the server."""
+    delay = random.uniform(min_delay, max_delay)
+    print(f"Sleeping for {delay:.2f} seconds...")
+    time.sleep(delay)
 
 def fetch_or_load_html(path, url=None):
     """Fetch from web if file does not exist, otherwise load from file."""
@@ -13,7 +27,8 @@ def fetch_or_load_html(path, url=None):
             return f.read()
     elif url:
         print(f"Fetching from {url}")
-        response = requests.get(url)
+        polite_sleep()  # Respectful delay before request
+        response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
@@ -26,8 +41,11 @@ def extract_slug(url):
     """Extract slug like 'vin' from a full SAQ category URL."""
     return urlparse(url).path.rstrip("/").split("/")[-1]
 
-def parse_categories_recursively(url, save_dir="run"):
+def parse_categories_recursively(url, save_dir="run", depth=0, max_depth=5):
     """Recursively parse a category page and return its structure with subcategories."""
+    if depth > max_depth:
+        return []
+
     slug = extract_slug(url)
     cat_dir = os.path.join(save_dir, slug)
     cat_file = os.path.join(cat_dir, f"{slug}.html")
@@ -49,7 +67,7 @@ def parse_categories_recursively(url, save_dir="run"):
             sub_slug = extract_slug(full_url)
 
             # Recursively parse subcategories
-            subcategories = parse_categories_recursively(full_url, save_dir)
+            subcategories = parse_categories_recursively(full_url, save_dir, depth + 1, max_depth)
 
             categories.append({
                 "name": clean_name,
@@ -66,10 +84,10 @@ main_slug = extract_slug(main_url)
 main_file = f"./run/{main_slug}.html"
 main_html = fetch_or_load_html(main_file, main_url)
 
-# Parse the top-level categories with full recursion
+# Parse top-level categories (with polite behavior)
 category_tree = parse_categories_recursively(main_url)
 
-# Print the structure
+# Output result
 def print_tree(categories, indent=0):
     for cat in categories:
         print(" " * indent + f"- {cat['name']} ({cat['count']})")

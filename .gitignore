@@ -70,11 +70,11 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-saq.json
-status
 
 # run files
 vibecoded/run
+saq.json
+status
 
 # venv
 scrapper-venv/
