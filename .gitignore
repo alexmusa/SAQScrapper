@@ -72,3 +72,9 @@ $RECYCLE.BIN/
 *.lnk
 saq.json
 status
+
+# run files
+vibecode/run
+
+# venv
+scrapper-venv/
