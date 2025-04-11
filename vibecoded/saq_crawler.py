@@ -26,50 +26,55 @@ def extract_slug(url):
     """Extract slug like 'vin' from a full SAQ category URL."""
     return urlparse(url).path.rstrip("/").split("/")[-1]
 
-def extract_categories(html_content):
-    """Extract categories/subcategories (name, count, URL, slug) from an SAQ page."""
+def parse_categories_recursively(url, save_dir="run"):
+    """Recursively parse a category page and return its structure with subcategories."""
+    slug = extract_slug(url)
+    cat_dir = os.path.join(save_dir, slug)
+    cat_file = os.path.join(cat_dir, f"{slug}.html")
+
+    html_content = fetch_or_load_html(cat_file, url)
     tree = html.fromstring(html_content)
     items = tree.xpath('//ol[@class="items" and @data-action="gtm-cat-filters-parent"]/li')
-    
+
     categories = []
     for item in items:
         name = item.xpath('.//a/text()[normalize-space()]')
         count = item.xpath('.//span[@class="count"]/text()')
-        url = item.xpath('.//a/@href')
-        if name and count and url:
+        href = item.xpath('.//a/@href')
+
+        if name and count and href:
+            full_url = href[0].strip()
             clean_name = name[0].strip()
             clean_count = int(count[0].strip().replace('\xa0', '').replace(',', ''))
-            full_url = url[0].strip()
+            sub_slug = extract_slug(full_url)
+
+            # Recursively parse subcategories
+            subcategories = parse_categories_recursively(full_url, save_dir)
+
             categories.append({
                 "name": clean_name,
-                "count": clean_count,
+                "slug": sub_slug,
                 "url": full_url,
-                "slug": extract_slug(full_url)
+                "count": clean_count,
+                "subcategories": subcategories
             })
     return categories
 
-# Step 1: Load or fetch main product page
-main_path = "./run/produits.html"
+# Start with the main SAQ product page
 main_url = f"{BASE_URL}/fr/produits"
-main_html = fetch_or_load_html(main_path, main_url)
+main_slug = extract_slug(main_url)
+main_file = f"./run/{main_slug}.html"
+main_html = fetch_or_load_html(main_file, main_url)
 
-# Step 2: Extract main product categories
-categories = extract_categories(main_html)
+# Parse the top-level categories with full recursion
+category_tree = parse_categories_recursively(main_url)
 
-# BEGIN_MINE: Check if it function correctly
-# for cat in categories:
-#     print(f"\nCategory: {cat['name']} - {cat['slug']} ({cat['count']} articles) {cat['url']}")
-# END_MINE  
+# Print the structure
+def print_tree(categories, indent=0):
+    for cat in categories:
+        print(" " * indent + f"- {cat['name']} ({cat['count']})")
+        if cat['subcategories']:
+            print_tree(cat['subcategories'], indent + 2)
 
-# Step 3: For each category, fetch its page and extract subcategories
-for cat in categories:
-    cat_dir = os.path.join("run", cat["slug"])
-    cat_file = os.path.join(cat_dir, f"{cat['slug']}.html")
-    cat_html = fetch_or_load_html(cat_file, cat["url"])
-    subcategories = extract_categories(cat_html)
-
-    # Output category and its subcategories
-    print(f"\nCategory: {cat['name']} ({cat['count']} articles)")
-    for sub in subcategories:
-        print(f"  ↳ Subcategory: {sub['name']} - {sub['slug']} ({sub['count']} articles)\n{sub['url']}")
-
+print("\nSAQ Category Tree:")
+print_tree(category_tree)
