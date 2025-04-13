@@ -1,6 +1,7 @@
 import os
 import time
 import random
+import json
 import requests
 from lxml import html
 from urllib.parse import urlparse
@@ -132,5 +133,14 @@ def print_category_tree(categories, indent=0):
 if __name__ == "__main__":
     main_url = f"{BASE_URL}/fr/produits"
     tree = parse_categories_recursively(main_url)
+
+    # Save category tree to JSON
+    save_dir="run"
+    output_file = os.path.join(save_dir, "category_tree.json")
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(tree, f, ensure_ascii=False, indent=2)
+    print(f"\nCategory tree saved to {output_file}")
+
+    # Optionally print the tree
     print("\nSAQ Category Tree:")
     print_category_tree(tree)
