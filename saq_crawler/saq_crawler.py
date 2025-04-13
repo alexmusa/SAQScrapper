@@ -7,6 +7,7 @@ import requests
 from lxml import html
 from urllib.parse import urlparse
 
+
 BASE_URL = "https://www.saq.com"
 HEADERS = {
     "User-Agent": (
@@ -61,9 +62,62 @@ def fetch_or_load_html(filepath, url=None):
 
     return response.text
 
+def save_all_category_pages(base_url, save_dir="run", product_list_limit=96):
+    """Fetch and save all pages of a category listing based on pagination."""
+    from math import ceil
+
+    slug = extract_slug(base_url)
+    dir_path = os.path.join(save_dir, slug)
+    os.makedirs(dir_path, exist_ok=True)
+
+    def page_file_path(page_num):
+        return os.path.join(dir_path, f"{slug}_p{page_num}.html")
+
+    # Load first page
+    page_1_url = f"{base_url}?p=1&product_list_limit={product_list_limit}"
+    page_1_html = fetch_or_load_html(page_file_path(1), page_1_url)
+    tree = html.fromstring(page_1_html)
+
+    # Extract total product count
+    count_text = tree.xpath('//p[@id="toolbar-amount"]//span[@class="toolbar-number"]/text()')
+    if not count_text or len(count_text) < 3:
+        logging.warning("Could not determine total number of products.")
+        return
+
+    total_products = int(count_text[2].replace('\xa0', '').replace(',', ''))
+    total_pages = ceil(total_products / product_list_limit)
+    logging.info(f"{total_products} products found. Expecting {total_pages} pages.")
+
+    # Fetch and save remaining pages
+    for page in range(2, total_pages + 1):
+        page_url = f"{base_url}?p={page}&product_list_limit={product_list_limit}"
+        logging.info(f"Processing page {page}/{total_pages}: {page_url}")
+        fetch_or_load_html(page_file_path(page), page_url)
+
 
 def extract_slug(url):
     return urlparse(url).path.rstrip("/").split("/")[-1]
+
+
+def get_path_parts(url: str) -> list:
+    """Returns the non-empty parts of the URL path."""
+    parsed = urlparse(url)
+    return [part for part in parsed.path.strip('/').split('/') if part]
+
+def get_parent_url(url: str) -> str:
+    """Returns the parent URL by removing the last path segment."""
+    parsed = urlparse(url)
+    parts = get_path_parts(url)
+    if parts:
+        new_path = '/' + '/'.join(parts[:-1])
+    else:
+        new_path = '/'
+    return f"{parsed.scheme}://{parsed.netloc}{new_path}"
+
+def get_sub_path(url: str) -> str:
+    """Returns the 'produits/vin' part from the URL."""
+    parts = get_path_parts(url)
+    return '/'.join(parts[1:-1]) if len(parts) > 2 else ''
 
 
 def clean_text(element):
@@ -156,6 +210,15 @@ def save_category_tree_json(categories, save_dir="run"):
         json.dump(categories, f, ensure_ascii=False, indent=2)
     logging.info(f"Category tree saved to {output_path}")
 
+def save_all_category_tree_pages(tree, save_dir="run"):
+    for category in tree:
+        dir_path = os.path.join(save_dir, get_sub_path(category['url']))
+        logging.info(
+            f"Saving all category pages for {category['name']} under {dir_path}..."
+        )
+        save_all_category_pages(category['url'], save_dir=dir_path)
+
+        save_all_category_tree_pages(category['subcategories'], save_dir)
 
 if __name__ == "__main__":
     save_dir = "run"
@@ -168,3 +231,9 @@ if __name__ == "__main__":
 
     print("\nSAQ Category Tree:")
     print_category_tree(tree)
+
+    # BEGIN_DEBUG
+    # save_dir = "run/produits/spiritueux/vodka"
+    # main_url = f"{BASE_URL}/fr/produits/spiritueux/vodka/vodka"
+    # END_DEBUG
+    save_all_category_tree_pages(tree)
