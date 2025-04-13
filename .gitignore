@@ -72,7 +72,8 @@ $RECYCLE.BIN/
 *.lnk
 
 # run files
-vibecoded/run
+**/__pycache__/
+run/
 saq.json
 status
 

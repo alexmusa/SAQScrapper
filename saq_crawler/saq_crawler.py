@@ -15,7 +15,7 @@ HEADERS = {
 }
 
 
-def polite_sleep(min_delay=1.0, max_delay=20.0):
+def polite_sleep(min_delay=1.0, max_delay=10.0):
     """Random delay to avoid overloading the server."""
     delay = random.uniform(min_delay, max_delay)
     print(f"Sleeping for {delay:.2f} seconds...")
