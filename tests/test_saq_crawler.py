@@ -15,11 +15,25 @@ def load_test_html(filename):
     with open(filename, "r", encoding="utf-8") as f:
         return html.fromstring(f.read())
 
-
+# test_pages should contain:
+# - Vin (7751)
+#   - Vin rouge (4758)
+#   - Vin blanc (2738) --- 2737 on vin-blanc.html
+#   - Vin rosé (255)
+# [...]
+# - Cooler et cocktail prémixé (264)
+#   - Cooler à base de spiritueux (223)
+#   - Cocktail à base de spiritueux (18)
+#   - Cocktail et cooler au vin (16)
+#     - Cooler au vin (15)
+#     - Sangria (1)
+#   - Cocktail au cidre (7)
+# [...]
 @pytest.mark.parametrize("relative_path, expected_parent, expected_current, expected_count", [
-    ("vin/vin.html", "Produits", "Vin", ""),
-    ("vin/blanc/blanc.html", "Vin", "Vin blanc", ""),
-    ("vin/blanc/france/france.html", "Vin blanc", "France", ""),
+    ("produits/vin/vin.html", "Autres catégories", "Vin", ""),
+    ("produits/vin/vin-blanc/vin-blanc.html", "Vin", "Vin blanc", 2737),
+    ("produits/cooler-et-cocktail-premixe/cocktail-et-cooler-au-vin/cooler-au-vin/cooler-au-vin.html", 
+        "Cocktail et cooler au vin", "Cooler au vin", 15),
 ])
 def test_parse_breadcrumbs(relative_path, expected_parent, expected_current, expected_count):
     filepath = os.path.join(TEST_DIR, relative_path)
@@ -33,8 +47,11 @@ def test_parse_breadcrumbs(relative_path, expected_parent, expected_current, exp
 
 
 @pytest.mark.parametrize("relative_path, expected_first_child", [
-    ("vin/vin.html", ("Vin rouge", 5541, "/fr/produits/vin/vin-rouge")),
-    ("vin/vin-blanc/vin-blanc.html", ("France", 1573, "/fr/produits/vin/vin-blanc/france")),
+    ("produits/vin/vin.html", ("Vin rouge", 4758, "https://www.saq.com/fr/produits/vin/vin-rouge")),
+    ("produits/cooler-et-cocktail-premixe/cocktail-et-cooler-au-vin/cocktail-et-cooler-au-vin.html", 
+        ("Cooler au vin", 
+        15, 
+        "https://www.saq.com/fr/produits/cooler-et-cocktail-premixe/cocktail-et-cooler-au-vin/cooler-au-vin")),
 ])
 def test_parse_subcategories(relative_path, expected_first_child):
     filepath = os.path.join(TEST_DIR, relative_path)
@@ -53,7 +70,7 @@ def test_parse_subcategories(relative_path, expected_first_child):
 
 def test_parse_categories_recursively_from_files():
     """Tests the recursive parser in a file-only context."""
-    root_url = "/fr/produits/vin"
+    root_url = "https://www.saq.com/fr/produits/vin"
     result = parse_categories_recursively(
         url=root_url,
         save_dir=TEST_DIR,
