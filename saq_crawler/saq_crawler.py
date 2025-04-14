@@ -1,3 +1,5 @@
+import re
+import unicodedata
 import os
 import time
 import random
@@ -129,6 +131,19 @@ def clean_count_text(count):
     return int(count[0].strip().replace('\xa0', '').replace(',', '')) if count else ''
 
 
+def normalize_price(price_str):
+    """Remove non-breaking spaces and other unicode characters from price string and convert to float."""
+    if not price_str:
+        return None
+    # Remove non-breaking spaces, regular spaces, and non-numeric characters except the dot
+    cleaned = unicodedata.normalize("NFKD", price_str)
+    cleaned = re.sub(r"[^\d.,]", "", cleaned).replace(",", ".")
+    try:
+        return float(cleaned)
+    except ValueError as e:
+        raise e
+
+
 def parse_breadcrumbs(items):
     """Extract category breadcrumb navigation."""
     parent_name = clean_text(items.xpath('//li[contains(@class, "item-parent")]/a/text()[normalize-space()]'))
@@ -227,7 +242,7 @@ def parse_products_from_html(html_content):
         discount_el = get('.//div[contains(@class,"product-item-discount")]/span/text()')
         discounted = bool(discount_el)
         discount_pct = discount_el[0].replace('%', '').strip() if discounted else ''
-
+        
         price = text('.//span[contains(@id, "product-price")]/span[@class="price"]/text()').replace('\xa0$', '').replace(',', '.')
         old_price_el = text('.//span[contains(@id, "old-price")]/span[@class="price"]/text()')
         old_price = old_price_el.replace('\xa0$', '').replace(',', '.') if old_price_el else price
@@ -246,8 +261,8 @@ def parse_products_from_html(html_content):
             "reviews_count": reviews_count,
             "discounted": discounted,
             "discount_pct": discount_pct,
-            "price": float(price.replace('$', '')) if price else None,
-            "old_price": float(old_price.replace('$', '')) if old_price else None,
+            "price": normalize_price(price),
+            "old_price": normalize_price(old_price),
             "available_online": available_online,
             "available_instore": available_instore,
         })
@@ -306,13 +321,15 @@ if __name__ == "__main__":
     setup_logging(save_dir)
     main_url = f"{BASE_URL}/fr/produits"
 
-    logging.info("Starting category parsing...")
-    tree = parse_categories_recursively(main_url, save_dir=save_dir)
-    save_category_tree_json(tree, save_dir=save_dir)
+    # logging.info("Starting category parsing...")
+    # tree = parse_categories_recursively(main_url, save_dir=save_dir)
+    # save_category_tree_json(tree, save_dir=save_dir)
 
-    print("\nSAQ Category Tree:")
-    print_category_tree(tree)
+    # print("\nSAQ Category Tree:")
+    # print_category_tree(tree)
 
-    save_all_category_tree_pages(tree)
-
+    # print("Retrieving all products...")
+    # save_all_category_tree_pages(tree)
+    
+    print("Extracting all products...")
     parse_all_saved_pages()
