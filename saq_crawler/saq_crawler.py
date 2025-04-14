@@ -228,8 +228,8 @@ def parse_products_from_html(html_content):
         code_saq = text('.//div[@class="saq-code"]/span[last()]/text()')
         name = text('.//a[contains(@class,"product-item-link")]/text()')
 
-        type_info = text('.//strong[contains(@class,"product-item-identity-format")]/span/text()')
-        parts = [part.strip() for part in type_info.split('|')]
+        type_info = get('.//strong[contains(@class, "product-item-identity-format")]/span//text()')
+        parts = [t.strip() for t in type_info if t.strip() and t.strip() != "|"]
         product_type = parts[0] if len(parts) > 0 else ''
         volume = parts[1] if len(parts) > 1 else ''
         country = parts[2] if len(parts) > 2 else ''
@@ -241,14 +241,14 @@ def parse_products_from_html(html_content):
 
         discount_el = get('.//div[contains(@class,"product-item-discount")]/span/text()')
         discounted = bool(discount_el)
-        discount_pct = discount_el[0].replace('%', '').strip() if discounted else ''
-        
+        discount_pct = discount_el[0].replace('%', '').strip() if discounted else None
+
         price = text('.//span[contains(@id, "product-price")]/span[@class="price"]/text()').replace('\xa0$', '').replace(',', '.')
         old_price_el = text('.//span[contains(@id, "old-price")]/span[@class="price"]/text()')
         old_price = old_price_el.replace('\xa0$', '').replace(',', '.') if old_price_el else price
 
-        available_online = bool(get('.//span[contains(text(), "En ligne")]'))
-        available_instore = bool(get('.//span[contains(text(), "En succursale")]'))
+        available_online = any("En ligne" in x for x in get('.//span[contains(@class,"in-stock")]/text()'))
+        available_instore = any("En succursale" in x for x in get('.//span[contains(@class,"in-stock")]/text()'))
 
         products.append({
             "url": url,
