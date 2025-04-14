@@ -4,6 +4,7 @@ import random
 import json
 import logging
 import requests
+import glob
 from lxml import html
 from urllib.parse import urlparse
 
@@ -195,6 +196,58 @@ def parse_categories_recursively(url, save_dir="run", depth=0, max_depth=5):
     return categories
 
 
+def parse_products_from_html(html_content):
+    tree = html.fromstring(html_content)
+    products = []
+
+    for li in tree.xpath('//li[contains(@class, "product-item")]'):
+        try:
+            url = li.xpath('.//a[@class="product-item-link"]/@href')[0]
+            name = li.xpath('.//a[@class="product-item-link"]/text()')[0].strip()
+            code_saq = li.xpath('.//div[contains(@class, "saq-code")]/span[2]/text()')[0].strip()
+
+            type_vol_country = li.xpath('.//strong[contains(@class, "product-item-identity-format")]/span//text()')
+            type_, volume, country = [t.strip() for t in type_vol_country if t.strip() and t.strip() != "|"]
+
+            rating_text = li.xpath('.//div[contains(@class,"rating-result")]/@title')
+            rating = int(rating_text[0].split(':')[-1].strip().strip('%')) if rating_text else None
+
+            reviews = li.xpath('.//div[contains(@class,"reviews-actions")]/a/text()')
+            num_reviews = int(reviews[0].strip("()")) if reviews else 0
+
+            discounted = bool(li.xpath('.//span[@class="old-price"]'))
+            if discounted:
+                price = li.xpath('.//span[@class="special-price"]//span[@class="price"]/text()')[0].strip()
+                special_price = price
+            else:
+                price = li.xpath('.//span[@class="price-box"]//span[@class="price"]/text()')[0].strip()
+                special_price = price
+
+            avail_online = any("En ligne" in x for x in li.xpath('.//span[contains(@class,"label-availabity")]/text()'))
+            avail_store = any("En succursale" in x for x in li.xpath('.//span[contains(@class,"label-availabity")]/text()'))
+
+            products.append({
+                "url": url,
+                "code_saq": code_saq,
+                "name": name,
+                "type": type_,
+                "volume": volume,
+                "country": country,
+                "rating": rating,
+                "num_reviews": num_reviews,
+                "discounted": discounted,
+                "price": price,
+                "special_price": special_price,
+                "available_online": avail_online,
+                "available_store": avail_store
+            })
+        except Exception as e:
+            logging.warning(f"Error parsing product: {e}")
+            continue
+
+    return products
+
+
 def print_category_tree(categories, indent=0):
     for cat in categories:
         print(" " * indent + f"- {cat['name']} ({cat['count']})")
@@ -220,20 +273,54 @@ def save_all_category_tree_pages(tree, save_dir="run"):
 
         save_all_category_tree_pages(category['subcategories'], save_dir)
 
+
+def extract_all_products_from_saved_pages(save_dir="run"):
+    all_products = []
+
+    for root, dirs, files in os.walk(save_dir):
+        page_files = sorted(glob.glob(os.path.join(root, "*_p*.html")))
+        if not page_files:
+            continue
+
+        category = os.path.relpath(root, save_dir).replace(os.sep, "_")
+        logging.info(f"Parsing {len(page_files)} pages in category: {category}")
+
+        category_products = []
+        for page_file in page_files:
+            try:
+                with open(page_file, "r", encoding="utf-8") as f:
+                    html_content = f.read()
+                products = parse_products_from_html(html_content)
+                category_products.extend(products)
+            except Exception as e:
+                logging.warning(f"Error processing {page_file}: {e}")
+
+        if category_products:
+            output_path = os.path.join(save_dir, f"{category}_products.json")
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(category_products, f, ensure_ascii=False, indent=2)
+            logging.info(f"Saved {len(category_products)} products to {output_path}")
+
+        all_products.extend(category_products)
+
+    return all_products
+
 if __name__ == "__main__":
     save_dir = "run"
     setup_logging(save_dir)
     main_url = f"{BASE_URL}/fr/produits"
 
-    logging.info("Starting category parsing...")
-    tree = parse_categories_recursively(main_url, save_dir=save_dir)
-    save_category_tree_json(tree, save_dir=save_dir)
+    # logging.info("Starting category parsing...")
+    # tree = parse_categories_recursively(main_url, save_dir=save_dir)
+    # save_category_tree_json(tree, save_dir=save_dir)
 
-    print("\nSAQ Category Tree:")
-    print_category_tree(tree)
+    # print("\nSAQ Category Tree:")
+    # print_category_tree(tree)
 
-    # BEGIN_DEBUG
-    # save_dir = "run/produits/spiritueux/vodka"
-    # main_url = f"{BASE_URL}/fr/produits/spiritueux/vodka/vodka"
-    # END_DEBUG
-    save_all_category_tree_pages(tree)
+    # print("Retrieving all products...")
+    # save_all_category_tree_pages(tree)
+    
+    print("Extracting all products...")
+    extract_all_products_from_saved_pages()
+
+    
