@@ -2,6 +2,7 @@ import os
 import time
 import random
 import json
+import glob
 import logging
 import requests
 from lxml import html
@@ -194,6 +195,64 @@ def parse_categories_recursively(url, save_dir="run", depth=0, max_depth=5):
         })
     return categories
 
+def parse_products_from_html(html_content):
+    """Extract product information from category page HTML."""
+    tree = html.fromstring(html_content)
+    product_elements = tree.xpath('//li[contains(@class, "product-item")]')
+
+    products = []
+
+    for product in product_elements:
+        def get(xpath_expr):
+            return product.xpath(xpath_expr)
+
+        def text(xpath_expr):
+            return get(xpath_expr)[0].strip() if get(xpath_expr) else ''
+
+        url = text('.//a[contains(@class,"product-item-link")]/@href')
+        code_saq = text('.//div[@class="saq-code"]/span[last()]/text()')
+        name = text('.//a[contains(@class,"product-item-link")]/text()')
+
+        type_info = text('.//strong[contains(@class,"product-item-identity-format")]/span/text()')
+        parts = [part.strip() for part in type_info.split('|')]
+        product_type = parts[0] if len(parts) > 0 else ''
+        volume = parts[1] if len(parts) > 1 else ''
+        country = parts[2] if len(parts) > 2 else ''
+
+        rating = text('.//div[contains(@class,"rating-result")]/@title')
+        rating_pct = int(rating.split(":")[1].replace("%", "").strip()) if ":" in rating else None
+        reviews_text = text('.//div[@class="reviews-actions"]/a/text()')
+        reviews_count = int(reviews_text.strip("()")) if reviews_text else 0
+
+        discount_el = get('.//div[contains(@class,"product-item-discount")]/span/text()')
+        discounted = bool(discount_el)
+        discount_pct = discount_el[0].replace('%', '').strip() if discounted else ''
+
+        price = text('.//span[contains(@id, "product-price")]/span[@class="price"]/text()').replace('\xa0$', '').replace(',', '.')
+        old_price_el = text('.//span[contains(@id, "old-price")]/span[@class="price"]/text()')
+        old_price = old_price_el.replace('\xa0$', '').replace(',', '.') if old_price_el else price
+
+        available_online = bool(get('.//span[contains(text(), "En ligne")]'))
+        available_instore = bool(get('.//span[contains(text(), "En succursale")]'))
+
+        products.append({
+            "url": url,
+            "code_saq": code_saq,
+            "name": name,
+            "type": product_type,
+            "volume": volume,
+            "country": country,
+            "rating_pct": rating_pct,
+            "reviews_count": reviews_count,
+            "discounted": discounted,
+            "discount_pct": discount_pct,
+            "price": float(price.replace('$', '')) if price else None,
+            "old_price": float(old_price.replace('$', '')) if old_price else None,
+            "available_online": available_online,
+            "available_instore": available_instore,
+        })
+
+    return products
 
 def print_category_tree(categories, indent=0):
     for cat in categories:
@@ -220,6 +279,28 @@ def save_all_category_tree_pages(tree, save_dir="run"):
 
         save_all_category_tree_pages(category['subcategories'], save_dir)
 
+def parse_all_saved_pages(base_dir="run", output_file="products.json"):
+    """Parse all saved category pages and extract product data into a single JSON file."""
+    all_products = []
+    page_files = glob.glob(os.path.join(base_dir, "**", "*_p*.html"), recursive=True)
+    logging.info(f"Found {len(page_files)} category page files to parse.")
+
+    for page_file in page_files:
+        logging.info(f"Parsing file: {page_file}")
+        try:
+            with open(page_file, "r", encoding="utf-8") as f:
+                html_content = f.read()
+                products = parse_products_from_html(html_content)
+                all_products.extend(products)
+        except Exception as e:
+            logging.error(f"Failed to parse {page_file}: {e}")
+
+    output_path = os.path.join(base_dir, output_file)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(all_products, f, ensure_ascii=False, indent=2)
+
+    logging.info(f"Saved {len(all_products)} products to {output_path}")
+
 if __name__ == "__main__":
     save_dir = "run"
     setup_logging(save_dir)
@@ -232,8 +313,6 @@ if __name__ == "__main__":
     print("\nSAQ Category Tree:")
     print_category_tree(tree)
 
-    # BEGIN_DEBUG
-    # save_dir = "run/produits/spiritueux/vodka"
-    # main_url = f"{BASE_URL}/fr/produits/spiritueux/vodka/vodka"
-    # END_DEBUG
     save_all_category_tree_pages(tree)
+
+    parse_all_saved_pages()
