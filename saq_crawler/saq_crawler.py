@@ -130,6 +130,9 @@ def clean_text(element):
 def clean_count_text(count):
     return int(count[0].strip().replace('\xa0', '').replace(',', '')) if count else ''
 
+def clean_extraneous_whitespace(text):
+    # Strip leading/trailing whitespace and replace multiple spaces/tabs/newlines with a single space
+    return re.sub(r'\s+', ' ', text).strip()
 
 def normalize_price(price_str):
     """Remove non-breaking spaces and other unicode characters from price string and convert to float."""
@@ -215,7 +218,7 @@ def parse_products_from_html(html_content):
     tree = html.fromstring(html_content)
     product_elements = tree.xpath('//li[contains(@class, "product-item")]')
 
-    products = []
+    products = {}
 
     for product in product_elements:
         def get(xpath_expr):
@@ -249,8 +252,12 @@ def parse_products_from_html(html_content):
 
         available_online = any("En ligne" in x for x in get('.//span[contains(@class,"in-stock")]/text()'))
         available_instore = any("En succursale" in x for x in get('.//span[contains(@class,"in-stock")]/text()'))
-
-        products.append({
+        
+        # Final clean-up
+        name = clean_extraneous_whitespace(name)
+        volume = clean_extraneous_whitespace(volume)
+        
+        products[code_saq] = {
             "url": url,
             "code_saq": code_saq,
             "name": name,
@@ -265,7 +272,7 @@ def parse_products_from_html(html_content):
             "old_price": normalize_price(old_price),
             "available_online": available_online,
             "available_instore": available_instore,
-        })
+        }
 
     return products
 
@@ -296,7 +303,7 @@ def save_all_category_tree_pages(tree, save_dir="run"):
 
 def parse_all_saved_pages(base_dir="run", output_file="products.json"):
     """Parse all saved category pages and extract product data into a single JSON file."""
-    all_products = []
+    all_products = {}
     page_files = glob.glob(os.path.join(base_dir, "**", "*_p*.html"), recursive=True)
     logging.info(f"Found {len(page_files)} category page files to parse.")
 
@@ -306,7 +313,7 @@ def parse_all_saved_pages(base_dir="run", output_file="products.json"):
             with open(page_file, "r", encoding="utf-8") as f:
                 html_content = f.read()
                 products = parse_products_from_html(html_content)
-                all_products.extend(products)
+                all_products = all_products | products
         except Exception as e:
             logging.error(f"Failed to parse {page_file}: {e}")
 
@@ -315,6 +322,39 @@ def parse_all_saved_pages(base_dir="run", output_file="products.json"):
         json.dump(all_products, f, ensure_ascii=False, indent=2)
 
     logging.info(f"Saved {len(all_products)} products to {output_path}")
+
+def parse_and_split_by_category(base_dir="run"):
+    """Parse saved pages and write products to individual JSON files per category."""
+    page_files = glob.glob(os.path.join(base_dir, "**", "*_p*.html"), recursive=True)
+    logging.info(f"Found {len(page_files)} page files for splitting by category.")
+
+    category_products = {}
+
+    for page_file in page_files:
+        try:
+            with open(page_file, "r", encoding="utf-8") as f:
+                html_content = f.read()
+                products = parse_products_from_html(html_content)
+
+                # Get relative category path from base_dir
+                relative_path = os.path.relpath(page_file, base_dir)
+                category_path = os.path.dirname(relative_path)
+
+                if category_path not in category_products:
+                    category_products[category_path] = []
+                category_products[category_path].extend(products)
+        except Exception as e:
+            logging.error(f"Error parsing {page_file}: {e}")
+
+    for category_path, products in category_products.items():
+        file = extract_slug(category_path)
+        output_path = os.path.join(base_dir, category_path, "products.json")
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            # json.dump(products, f, ensure_ascii=False, indent=2)
+            pass
+        logging.info(f"Saved {len(products)} products to {output_path}")
+
 
 if __name__ == "__main__":
     save_dir = "run"
@@ -325,11 +365,12 @@ if __name__ == "__main__":
     # tree = parse_categories_recursively(main_url, save_dir=save_dir)
     # save_category_tree_json(tree, save_dir=save_dir)
 
-    # print("\nSAQ Category Tree:")
+    # print("SAQ Category Tree:")
     # print_category_tree(tree)
 
-    # print("Retrieving all products...")
+    # logging.info("Retrieving all products...")
     # save_all_category_tree_pages(tree)
     
-    print("Extracting all products...")
+    logging.info("Extracting all products...")
     parse_all_saved_pages()
+    # parse_and_split_by_category()
