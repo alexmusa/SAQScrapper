@@ -1,0 +1,14 @@
+For each product in each category, retrieve its
+- URL
+- Code SAQ
+- Name
+- Type
+- Volume
+- Country of origin
+- Rating (%)
+- Number of reviews
+- If it is discounted
+- Price
+- Special price (same as price if not discounted)
+- Availability "En ligne"
+- Availability "En succursale"

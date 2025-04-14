@@ -1,0 +1,240 @@
+<li class="item product product-item ">
+    <div class="product-item-info " data-container="product-grid" id="pid-302834">
+        <div class="wrapper-taste-tag">
+        </div>
+        <div class="product discount product-item-discount hide" data-product-id="302834">
+            <span></span>
+        </div>
+        <a href="https://www.saq.com/fr/907477" class="product photo product-item-photo" tabindex="-1" aria-labelledby="productName-302834">
+            <span id="productName-302834" class="show-for-sr">
+                Allegrini Palazzo della Torre Veronese                                2021                                                                                                        750                                    ml                                                            </span>
+                <span class="product-image-container product-image-container-302834" style="width: 111px;">
+                    <span class="product-image-wrapper" style="padding-bottom: 149.55%;">
+                        <img class="product-image-photo" srcset="https://www.saq.com/media/catalog/product/9/0/907477-1_1580607615.png?optimize=high&amp;fit=bounds&amp;height=166&amp;width=111&amp;canvas=111:166&amp;format=jpeg&amp;dpr=2 2x,https://www.saq.com/media/catalog/product/9/0/907477-1_1580607615.png?optimize=high&amp;fit=bounds&amp;height=166&amp;width=111&amp;canvas=111:166&amp;format=jpeg&amp;dpr=3 3x" src="https://www.saq.com/media/catalog/product/9/0/907477-1_1580607615.png?optimize=high&amp;fit=bounds&amp;height=166&amp;width=111&amp;canvas=111:166&amp;format=jpeg" loading="lazy" width="111" height="166" alt="Allegrini Palazzo della Torre Veronese" aria-hidden="true"></span>
+                    </span>
+                    <style>.product-image-container-302834 {
+                        width: 111px;
+                    }
+                    .product-image-container-302834 span.product-image-wrapper {
+                        padding-bottom: 149.54954954955%;
+                    }</style><script type="text/javascript">prodImageContainers = document.querySelectorAll(".product-image-container-302834");
+                        for (var i = 0; i < prodImageContainers.length; i++) {
+                            prodImageContainers[i].style.width = "111px";
+                        }
+                        prodImageContainersWrappers = document.querySelectorAll(
+                        ".product-image-container-302834  span.product-image-wrapper"
+                        );
+                        for (var i = 0; i < prodImageContainersWrappers.length; i++) {
+                            prodImageContainersWrappers[i].style.paddingBottom = "149.54954954955%";
+                        }</script>
+                    </a>
+                    <div class="product-item-content-container">
+                        <div class="product details product-item-details" data-equalizer-watch="" style="height: 284px;">
+                            <div class="product content-wrapper">
+                                
+                                <div class="wrapper-marketing-brand">
+                                </div>
+                                
+                                <strong class="product name product-item-name">
+                                    <a class="product-item-link" href="https://www.saq.com/fr/907477" aria-labelledby="productName-302834">
+                                        Allegrini Palazzo della Torre Veronese                                            2021                                        </a>
+                                    </strong>
+                                    
+                                    <strong class="product product-item-identity-format">
+                                        <span>
+                                            Vin rouge                                                                                                    <span class="divider"> | </span>
+                                            750                                                    ml                                                                                                                                                                                        <span class="divider"> | </span>
+                                            Italie                                                                                    </span>
+                                        </strong>
+                                        <div class="saq-code">
+                                            <span>Code SAQ</span> <span>907477</span>
+                                        </div>
+                                        
+                                        <div class="product-reviews-summary short">
+                                            <div class="rating-summary">
+                                                <a class="action view" href="https://www.saq.com/fr/907477" id="rating-result_302834">
+                                                    <div class="rating-result" id="rating-result_302834" title="Note des clients : 83%">
+                                                        <span style="width: 83%">
+                                                            <span>83%</span>
+                                                        </span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="reviews-actions">
+                                                <a class="action view" href="https://www.saq.com/fr/907477">(29)</a>
+                                            </div>
+                                        </div>
+                                        <div class="price-box price-final_price">
+                                            <span class="price-container price-final_price tax weee">
+                                                <span id="product-price-302834" class="price-wrapper ">
+                                                    
+                                                    <span class="price">25,65&nbsp;$</span>                    </span>
+                                                </span>
+                                                
+                                            </div>
+                                            <div class="product-item-placeholder">
+                                            </div>
+                                            <div class="tier-price product-item-tier-price" data-product-id="302834" data-role="tier-price-block">
+                                                
+                                            </div>
+                                            
+                                        </div>
+                                        
+                                        
+                                        <div class="availability-container">
+                                            <span class="label-availabity in-stock">
+                                                <span class="show-for-sr">Disponible</span>
+                                                En ligne</span>
+                                                
+                                                <span class="label-availabity in-stock">
+                                                    <span class="show-for-sr">Disponible</span>
+                                                    En succursale</span>
+                                                </div>
+                                                
+                                            </div>
+                                            <div class="product actions product-item-actions">
+                                                <div class="actions-primary">
+                                                    <form data-role="tocart-form" data-product-sku="907477" action="https://www.saq.com/fr/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuc2FxLmNvbS9mci9wcm9kdWl0cz9wPTEyMCZwcm9kdWN0X2xpc3RfbGltaXQ9OTY~/product/302834/" method="post">
+                                                        <input type="hidden" name="product" value="302834">
+                                                        <input type="hidden" name="uenc" value="aHR0cHM6Ly93d3cuc2FxLmNvbS9mci9jaGVja291dC9jYXJ0L2FkZC91ZW5jL2FIUjBjSE02THk5M2QzY3VjMkZ4TG1OdmJTOW1jaTl3Y205a2RXbDBjejl3UFRFeU1DWndjbTlrZFdOMFgyeHBjM1JmYkdsdGFYUTlPVFl-L3Byb2R1Y3QvMzAyODM0Lw~~">
+                                                        <input name="form_key" type="hidden" value="FBILny7VTRRmnasu">                                            <button type="submit" title="Ajouter au panier" class="action tocart primary">
+                                                            <span>Ajouter au panier</span>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                                <div data-role="add-to-links" class="actions-secondary">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+
+
+<li class="item product product-item ">
+    <div class="product-item-info" data-container="product-grid" id="pid-364574">
+        
+        <div class="wrapper-taste-tag">
+            
+            
+        </div>
+        
+        <div class="product discount product-item-discount " data-product-id="364574">
+            <span>13%</span>
+        </div>
+        
+        <a href="https://www.saq.com/fr/15148260" class="product photo product-item-photo" tabindex="-1" aria-labelledby="productName-364574">
+            <span id="productName-364574" class="show-for-sr">
+                Allo j'tm Vodka Limonade Rose                                                                                                                                        4 x 355                                    ml                                                            </span>
+                <span class="product-image-container product-image-container-364574" style="width: 111px;">
+                    <span class="product-image-wrapper" style="padding-bottom: 149.55%;">
+                        <img class="product-image-photo" srcset="https://www.saq.com/media/catalog/product/1/5/15148260-1_1681400283.png?optimize=high&amp;fit=bounds&amp;height=166&amp;width=111&amp;canvas=111:166&amp;format=jpeg&amp;dpr=2 2x,https://www.saq.com/media/catalog/product/1/5/15148260-1_1681400283.png?optimize=high&amp;fit=bounds&amp;height=166&amp;width=111&amp;canvas=111:166&amp;format=jpeg&amp;dpr=3 3x" src="https://www.saq.com/media/catalog/product/1/5/15148260-1_1681400283.png?optimize=high&amp;fit=bounds&amp;height=166&amp;width=111&amp;canvas=111:166&amp;format=jpeg" loading="lazy" width="111" height="166" alt="Allo j'tm Vodka Limonade Rose" aria-hidden="true"></span>
+                    </span>
+                    <style>.product-image-container-364574 {
+                        width: 111px;
+                    }
+                    .product-image-container-364574 span.product-image-wrapper {
+                        padding-bottom: 149.54954954955%;
+                    }</style><script type="text/javascript">prodImageContainers = document.querySelectorAll(".product-image-container-364574");
+                        for (var i = 0; i < prodImageContainers.length; i++) {
+                            prodImageContainers[i].style.width = "111px";
+                        }
+                        prodImageContainersWrappers = document.querySelectorAll(
+                        ".product-image-container-364574  span.product-image-wrapper"
+                        );
+                        for (var i = 0; i < prodImageContainersWrappers.length; i++) {
+                            prodImageContainersWrappers[i].style.paddingBottom = "149.54954954955%";
+                        }</script>
+                    </a>
+                    <div class="product-item-content-container">
+                        <div class="product details product-item-details" data-equalizer-watch="" style="height: 284px;">
+                            <div class="product content-wrapper">
+                                
+                                <div class="wrapper-marketing-brand">
+                                    <img class="image-origine-qc" src="https://www.saq.com/media/wysiwyg/product_tags/origine_qc/eqc_small.png" alt="Embouteillé au Québec" title="Produit du Québec : Embouteillé au Québec">
+                                </div>
+                                
+                                <strong class="product name product-item-name">
+                                    <a class="product-item-link" href="https://www.saq.com/fr/15148260" aria-labelledby="productName-364574">
+                                        Allo j'tm Vodka Limonade Rose                                                                                    </a>
+                                    </strong>
+                                    
+                                    <strong class="product product-item-identity-format">
+                                        <span>
+                                            Cooler au spiritueux                                                                                                    <span class="divider"> | </span>
+                                            4 x 355                                                    ml                                                                                                                                                                                        <span class="divider"> | </span>
+                                            Canada                                                                                    </span>
+                                        </strong>
+                                        <div class="saq-code">
+                                            <span>Code SAQ</span> <span>15148260</span>
+                                        </div>
+                                        
+                                        <div class="product-reviews-summary short">
+                                            <div class="rating-summary">
+                                                <a class="action view" href="https://www.saq.com/fr/15148260" id="rating-result_364574">
+                                                    <div class="rating-result" id="rating-result_364574" title="Note des clients : 95%">
+                                                        <span style="width: 95%">
+                                                            <span>95%</span>
+                                                        </span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="reviews-actions">
+                                                <a class="action view" href="https://www.saq.com/fr/15148260">(8)</a>
+                                            </div>
+                                        </div>
+                                        <div class="price-box price-final_price">
+                                            <span class="old-price">
+                                                <span class="price-container price-final_price tax weee">
+                                                    <span class="show-for-sr">Prix normal</span>
+                                                    <span id="old-price-364574" class="price-wrapper ">
+                                                        
+                                                        <span class="price">14,80&nbsp;$</span>                    </span>
+                                                    </span>
+                                                </span>
+                                                <span class="special-price">
+                                                    <span class="price-container price-final_price tax weee">
+                                                        <span class="show-for-sr">Prix Spécial</span>
+                                                        <span id="product-price-364574" class="price-wrapper ">
+                                                            
+                                                            <span class="price">12,80&nbsp;$</span>                    </span>
+                                                        </span>
+                                                    </span>
+                                                    
+                                                </div>
+                                                <div class="product-item-placeholder">
+                                                </div>
+                                                <div class="tier-price product-item-tier-price" data-product-id="364574" data-role="tier-price-block">
+                                                    
+                                                </div>
+                                                
+                                            </div>
+                                            
+                                            
+                                            <div class="availability-container">
+                                                <span class="label-availabity in-stock">
+                                                    <span class="show-for-sr">Disponible</span>
+                                                    En ligne</span>
+                                                    
+                                                    <span class="label-availabity in-stock">
+                                                        <span class="show-for-sr">Disponible</span>
+                                                        En succursale</span>
+                                                    </div>
+                                                    
+                                                </div>
+                                                <div class="product actions product-item-actions">
+                                                    <div class="actions-primary">
+                                                        <form data-role="tocart-form" data-product-sku="15148260" action="https://www.saq.com/fr/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuc2FxLmNvbS9mci9wcm9kdWl0cz9wPTEyMCZwcm9kdWN0X2xpc3RfbGltaXQ9OTY~/product/364574/" method="post">
+                                                            <input type="hidden" name="product" value="364574">
+                                                            <input type="hidden" name="uenc" value="aHR0cHM6Ly93d3cuc2FxLmNvbS9mci9jaGVja291dC9jYXJ0L2FkZC91ZW5jL2FIUjBjSE02THk5M2QzY3VjMkZ4TG1OdmJTOW1jaTl3Y205a2RXbDBjejl3UFRFeU1DWndjbTlrZFdOMFgyeHBjM1JmYkdsdGFYUTlPVFl-L3Byb2R1Y3QvMzY0NTc0Lw~~">
+                                                            <input name="form_key" type="hidden" value="FBILny7VTRRmnasu">                                            <button type="submit" title="Ajouter au panier" class="action tocart primary">
+                                                                <span>Ajouter au panier</span>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                    <div data-role="add-to-links" class="actions-secondary">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>

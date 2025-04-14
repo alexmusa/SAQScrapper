@@ -1,0 +1,1 @@
+Let me know if you want it to split the JSON by category, slug, or page instead of saving everything into one file.

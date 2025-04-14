@@ -1,0 +1,164 @@
+The pager on a category page when on the first page shows as:
+<div class="pages">
+            <strong class="label pages-label" id="paging-label">Page</strong>
+            <ul class="items pages-items" aria-labelledby="paging-label">
+            
+            
+            
+                                                <li class="item current">
+                        <strong class="page">
+                            <span class="label">Vous lisez actuellement la page</span>
+                            <span>1</span>
+                        </strong>
+                    </li>
+                                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=2&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>2</span>
+                        </a>
+                    </li>
+                                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=3&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>3</span>
+                        </a>
+                    </li>
+                                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=4&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>4</span>
+                        </a>
+                    </li>
+                                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=5&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>5</span>
+                        </a>
+                    </li>
+                            
+            
+            
+                            <li class="item pages-item-next">
+                                        <a class="action  next" href="https://www.saq.com/fr/produits?p=1&amp;product_list_limit=96" title="Suivant">
+                        <span class="label">Page</span>
+                        <span>Suivant</span>
+                    </a>
+                </li>
+                        </ul>
+        </div>
+
+When inbetween pages:
+<div class="pages">
+            <strong class="label pages-label" id="paging-label">Page</strong>
+            <ul class="items pages-items" aria-labelledby="paging-label">
+                            <li class="item pages-item-previous">
+                                        <a class="action  previous" href="https://www.saq.com/fr/produits?p=4&amp;product_list_limit=96" title="Précédent">
+                        <span class="label">Page</span>
+                        <span>Précédent</span>
+                    </a>
+                </li>
+            
+            
+            
+                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=3&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>3</span>
+                        </a>
+                    </li>
+                                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=4&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>4</span>
+                        </a>
+                    </li>
+                                                                <li class="item current">
+                        <strong class="page">
+                            <span class="label">Vous lisez actuellement la page</span>
+                            <span>5</span>
+                        </strong>
+                    </li>
+                                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=6&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>6</span>
+                        </a>
+                    </li>
+                                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=7&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>7</span>
+                        </a>
+                    </li>
+                            
+            
+            
+                            <li class="item pages-item-next">
+                                        <a class="action  next" href="https://www.saq.com/fr/produits?p=6&amp;product_list_limit=96" title="Suivant">
+                        <span class="label">Page</span>
+                        <span>Suivant</span>
+                    </a>
+                </li>
+                        </ul>
+        </div>
+
+On the last page:
+<div class="pages">
+            <strong class="label pages-label" id="paging-label">Page</strong>
+            <ul class="items pages-items" aria-labelledby="paging-label">
+                            <li class="item pages-item-previous">
+                                        <a class="action  previous" href="https://www.saq.com/fr/produits?p=102&amp;product_list_limit=96" title="Précédent">
+                        <span class="label">Page</span>
+                        <span>Précédent</span>
+                    </a>
+                </li>
+            
+            
+            
+                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=99&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>99</span>
+                        </a>
+                    </li>
+                                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=100&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>100</span>
+                        </a>
+                    </li>
+                                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=101&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>101</span>
+                        </a>
+                    </li>
+                                                                <li class="item">
+                        <a href="https://www.saq.com/fr/produits?p=102&amp;product_list_limit=96" class="page">
+                            <span class="label">Page</span>
+                            <span>102</span>
+                        </a>
+                    </li>
+                                                                <li class="item current">
+                        <strong class="page">
+                            <span class="label">Vous lisez actuellement la page</span>
+                            <span>103</span>
+                        </strong>
+                    </li>
+                            
+            
+            
+                        </ul>
+        </div>
+
+The following information is also displayed:
+<p class="toolbar-amount" id="toolbar-amount">
+            Résultats <span class="toolbar-number">9793</span>-<span class="toolbar-number">9885</span> sur <span class="toolbar-number">9885</span>        <!-- /SAQ custom code -->
+        </p>
+
+A product_list_limit of 96 is used to reduce the amount of requests.
+
+Add a function that saves all pages from a category.
+
+
+The page 103 can be queried by appending ?p=103 to the url like in https://www.saq.com/fr/produits?p=103&product_list_limit=96
