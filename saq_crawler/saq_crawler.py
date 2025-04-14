@@ -213,7 +213,7 @@ def parse_categories_recursively(url, save_dir="run", depth=0, max_depth=5):
         })
     return categories
 
-def parse_products_from_html(html_content):
+def parse_products_from_html(html_content, categories=[]):
     """Extract product information from category page HTML."""
     tree = html.fromstring(html_content)
     product_elements = tree.xpath('//li[contains(@class, "product-item")]')
@@ -272,6 +272,7 @@ def parse_products_from_html(html_content):
             "old_price": normalize_price(old_price),
             "available_online": available_online,
             "available_instore": available_instore,
+            "categories": categories,
         }
 
     return products
@@ -290,6 +291,7 @@ def save_category_tree_json(categories, save_dir="run"):
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(categories, f, ensure_ascii=False, indent=2)
     logging.info(f"Category tree saved to {output_path}")
+    return categories
 
 def save_all_category_tree_pages(tree, save_dir="run"):
     for category in tree:
@@ -302,7 +304,6 @@ def save_all_category_tree_pages(tree, save_dir="run"):
         save_all_category_tree_pages(category['subcategories'], save_dir)
 
 def parse_all_saved_pages(base_dir="run", output_file="products.json"):
-    """Parse all saved category pages and extract product data into a single JSON file."""
     all_products = {}
     page_files = glob.glob(os.path.join(base_dir, "**", "*_p*.html"), recursive=True)
     logging.info(f"Found {len(page_files)} category page files to parse.")
@@ -312,8 +313,20 @@ def parse_all_saved_pages(base_dir="run", output_file="products.json"):
         try:
             with open(page_file, "r", encoding="utf-8") as f:
                 html_content = f.read()
-                products = parse_products_from_html(html_content)
-                all_products = all_products | products
+                
+                # Get relative path and extract categories
+                rel_path = os.path.relpath(page_file, base_dir)
+                path_parts = rel_path.split(os.sep)[1:-1]  # skip file name
+                categories = [part for part in path_parts if part and not part.startswith("p=")]
+
+                products = parse_products_from_html(html_content, categories=categories)
+                for code_SAQ, product in products.items():
+                    if code_SAQ in all_products:
+                        a = set(all_products[code_SAQ]["categories"])
+                        b = set(product["categories"])
+                        all_products[code_SAQ]["categories"] = list(a.union(b))
+                    else:
+                        all_products[code_SAQ] = product
         except Exception as e:
             logging.error(f"Failed to parse {page_file}: {e}")
 
@@ -322,38 +335,7 @@ def parse_all_saved_pages(base_dir="run", output_file="products.json"):
         json.dump(all_products, f, ensure_ascii=False, indent=2)
 
     logging.info(f"Saved {len(all_products)} products to {output_path}")
-
-def parse_and_split_by_category(base_dir="run"):
-    """Parse saved pages and write products to individual JSON files per category."""
-    page_files = glob.glob(os.path.join(base_dir, "**", "*_p*.html"), recursive=True)
-    logging.info(f"Found {len(page_files)} page files for splitting by category.")
-
-    category_products = {}
-
-    for page_file in page_files:
-        try:
-            with open(page_file, "r", encoding="utf-8") as f:
-                html_content = f.read()
-                products = parse_products_from_html(html_content)
-
-                # Get relative category path from base_dir
-                relative_path = os.path.relpath(page_file, base_dir)
-                category_path = os.path.dirname(relative_path)
-
-                if category_path not in category_products:
-                    category_products[category_path] = []
-                category_products[category_path].extend(products)
-        except Exception as e:
-            logging.error(f"Error parsing {page_file}: {e}")
-
-    for category_path, products in category_products.items():
-        file = extract_slug(category_path)
-        output_path = os.path.join(base_dir, category_path, "products.json")
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        with open(output_path, "w", encoding="utf-8") as f:
-            # json.dump(products, f, ensure_ascii=False, indent=2)
-            pass
-        logging.info(f"Saved {len(products)} products to {output_path}")
+    return all_products
 
 
 if __name__ == "__main__":
@@ -373,4 +355,3 @@ if __name__ == "__main__":
     
     logging.info("Extracting all products...")
     parse_all_saved_pages()
-    # parse_and_split_by_category()
