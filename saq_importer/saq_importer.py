@@ -4,7 +4,7 @@ import os
 import logging
 from psycopg2.extras import Json
 
-# Database config — adjust these for your setup
+# Database config — adjust these
 DB_CONFIG = {
     "dbname": "saq_db",
     "user": "your_user",
@@ -14,6 +14,7 @@ DB_CONFIG = {
 }
 
 PRODUCTS_JSON = os.path.join("run", "products.json")
+DETAILS_JSON = os.path.join("run", "details", "product_details.json")
 
 
 def setup_logging():
@@ -27,7 +28,7 @@ def connect_db():
     return psycopg2.connect(**DB_CONFIG)
 
 
-def create_table(conn):
+def create_tables(conn):
     with conn.cursor() as cur:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS products (
@@ -48,6 +49,12 @@ def create_table(conn):
                 categories JSONB
             );
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS product_attributes (
+                code_saq TEXT PRIMARY KEY,
+                attributes JSONB
+            );
+        """)
         conn.commit()
 
 
@@ -55,7 +62,7 @@ def import_products(conn, json_path):
     with open(json_path, "r", encoding="utf-8") as f:
         products = json.load(f)
 
-    logging.info(f"Importing {len(products)} products into the database...")
+    logging.info(f"Importing {len(products)} products into 'products' table...")
 
     with conn.cursor() as cur:
         for code_saq, product in products.items():
@@ -87,12 +94,36 @@ def import_products(conn, json_path):
             })
 
     conn.commit()
-    logging.info("Import complete.")
+    logging.info("Finished importing products.")
+
+
+def import_product_details(conn, json_path):
+    with open(json_path, "r", encoding="utf-8") as f:
+        details = json.load(f)
+
+    logging.info(f"Importing attributes for {len(details)} products into 'product_attributes' table...")
+
+    with conn.cursor() as cur:
+        for code_saq, attributes in details.items():
+            cur.execute("""
+                INSERT INTO product_attributes (
+                    code_saq, attributes
+                )
+                VALUES (
+                    %s, %s
+                )
+                ON CONFLICT (code_saq) DO UPDATE SET
+                    attributes = EXCLUDED.attributes;
+            """, (code_saq, Json(attributes)))
+
+    conn.commit()
+    logging.info("Finished importing product attributes.")
 
 
 if __name__ == "__main__":
     setup_logging()
     conn = connect_db()
-    create_table(conn)
+    create_tables(conn)
     import_products(conn, PRODUCTS_JSON)
+    import_product_details(conn, DETAILS_JSON)
     conn.close()
