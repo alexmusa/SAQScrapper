@@ -37,7 +37,7 @@ def setup_logging(save_dir="run"):
     logging.info("Logging is set up.")
 
 
-def polite_sleep(min_delay=1.0, max_delay=10.0):
+def polite_sleep(min_delay=1.0, max_delay=30.0):
     """Random delay to avoid overloading the server."""
     delay = random.uniform(min_delay, max_delay)
     logging.info(f"Sleeping for {delay:.2f} seconds...")
@@ -337,6 +337,23 @@ def parse_all_saved_pages(base_dir="run", output_file="products.json"):
     logging.info(f"Saved {len(all_products)} products to {output_path}")
     return all_products
 
+def fetch_all_product_details(products, base_dir="run", details_dir="run/details"):
+    """Fetch and save all product detail pages."""
+    os.makedirs(details_dir, exist_ok=True)
+
+    for code_saq, product in products.items():
+        url = product.get("url")
+        if not url:
+            logging.warning(f"No URL found for product {code_saq}")
+            continue
+
+        detail_path = os.path.join(details_dir, f"{code_saq}.html")
+        try:
+            fetch_or_load_html(detail_path, url)
+        except Exception as e:
+            logging.error(f"Failed to fetch detail page for {code_saq} ({url}): {e}")
+
+    logging.info(f"Finished fetching detail pages for {len(products)} products.")
 
 if __name__ == "__main__":
     save_dir = "run"
@@ -353,5 +370,8 @@ if __name__ == "__main__":
     # logging.info("Retrieving all products...")
     # save_all_category_tree_pages(tree)
     
-    logging.info("Extracting all products...")
-    parse_all_saved_pages()
+    logging.info("Parsing all products...")
+    products = parse_all_saved_pages()
+
+    logging.info("Fetching all products details...")
+    fetch_all_product_details(products)
