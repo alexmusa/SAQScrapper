@@ -355,23 +355,62 @@ def fetch_all_product_details(products, base_dir="run", details_dir="run/details
 
     logging.info(f"Finished fetching detail pages for {len(products)} products.")
 
+def parse_all_product_details(details_dir="run/details", output_file="product_details.json"):
+    """Parse all product detail HTML files and extract attributes into a dictionary."""
+    detail_files = glob.glob(os.path.join(details_dir, "*.html"))
+    logging.info(f"Parsing {len(detail_files)} product detail pages...")
+
+    all_details = {}
+
+    for filepath in detail_files:
+        code_saq = os.path.splitext(os.path.basename(filepath))[0]
+
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            tree = html.fromstring(content)
+            items = tree.xpath('//div[@class="additional-attributes-wrapper"]//ul[@class="list-attributs"]/li')
+
+            attributes = {}
+            for item in items:
+                key = clean_extraneous_whitespace("".join(item.xpath('./span//text()')))
+                value = clean_extraneous_whitespace("".join(item.xpath('./strong//text()')))
+                if key and value:
+                    attributes[key] = value
+
+            all_details[code_saq] = attributes
+        except Exception as e:
+            logging.error(f"Failed to parse {filepath}: {e}")
+
+    output_path = os.path.join(details_dir, output_file)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(all_details, f, ensure_ascii=False, indent=2)
+
+    logging.info(f"Saved detailed attributes for {len(all_details)} products to {output_path}")
+    return all_details
+
+
 if __name__ == "__main__":
     save_dir = "run"
     setup_logging(save_dir)
     main_url = f"{BASE_URL}/fr/produits"
 
-    # logging.info("Starting category parsing...")
-    # tree = parse_categories_recursively(main_url, save_dir=save_dir)
-    # save_category_tree_json(tree, save_dir=save_dir)
+    logging.info("Starting category parsing...")
+    tree = parse_categories_recursively(main_url, save_dir=save_dir)
+    save_category_tree_json(tree, save_dir=save_dir)
 
-    # print("SAQ Category Tree:")
-    # print_category_tree(tree)
+    print("SAQ Category Tree:")
+    print_category_tree(tree)
 
-    # logging.info("Retrieving all products...")
-    # save_all_category_tree_pages(tree)
+    logging.info("Retrieving all products...")
+    save_all_category_tree_pages(tree)
     
     logging.info("Parsing all products...")
     products = parse_all_saved_pages()
 
     logging.info("Fetching all products details...")
     fetch_all_product_details(products)
+
+    logging.info("Parsing all products details...")
+    parse_all_product_details()
