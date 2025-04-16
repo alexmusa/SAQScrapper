@@ -1,0 +1,16 @@
+opam-version: "2.0"
+
+depends: [
+  "caqti-driver-sqlite3" {>= "1.7.0"}
+  "ocaml" {>= "4.08.0"}
+  "dream"
+  "dune" {>= "2.0.0"}
+  "ppx_yojson_conv"
+]
+
+synopsis: "API to expose information on SAQ products"
+homepage: "https://github.com/alexmusa/SAQScrapper"
+# bug-reports: "https://github.com/aantron/dream/issues"
+# author: "Anton Bachin <antonbachin@yahoo.com>"
+# license: "MIT"
+maintainer: "Alexandre Musaraganyi <alexandre.musaraganyi@polymtl.ca>"
