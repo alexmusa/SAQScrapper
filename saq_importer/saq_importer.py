@@ -2,6 +2,7 @@ import json
 import psycopg2
 import os
 import logging
+from datetime import datetime
 from psycopg2.extras import Json
 
 # Database config — adjust these
@@ -31,8 +32,8 @@ def connect_db():
 def create_tables(conn):
     with conn.cursor() as cur:
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS products (
-                code_saq TEXT PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS products_history (
+                code_saq TEXT,
                 name TEXT,
                 url TEXT,
                 type TEXT,
@@ -46,7 +47,10 @@ def create_tables(conn):
                 old_price REAL,
                 available_online BOOLEAN,
                 available_instore BOOLEAN,
-                categories JSONB
+                categories JSONB,
+                valid_from TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                valid_to TIMESTAMPTZ,
+                PRIMARY KEY (code_saq, valid_from)
             );
         """)
         cur.execute("""
@@ -62,18 +66,39 @@ def import_products(conn, json_path):
     with open(json_path, "r", encoding="utf-8") as f:
         products = json.load(f)
 
-    logging.info(f"Importing {len(products)} products into 'products' table...")
+    logging.info(f"Importing {len(products)} products with history tracking...")
 
     with conn.cursor() as cur:
         for code_saq, product in products.items():
+            cur.execute("SELECT * FROM products WHERE code_saq = %s", (code_saq,))
+            existing = cur.fetchone()
+
+            # Prepare product values
+            values = {
+                **product,
+                "categories": Json(product.get("categories", []))
+            }
+
+            # Check if anything changed
+            should_insert_history = False
+            if existing:
+                columns = [desc[0] for desc in cur.description]
+                current = dict(zip(columns, existing))
+                for key in values:
+                    if key in current and values[key] != current[key]:
+                        should_insert_history = True
+                        break
+            else:
+                should_insert_history = True
+
+            # Update main table
             cur.execute("""
                 INSERT INTO products (
                     code_saq, name, url, type, volume, country,
                     rating_pct, reviews_count, discounted, discount_pct,
                     price, old_price, available_online, available_instore,
                     categories
-                )
-                VALUES (
+                ) VALUES (
                     %(code_saq)s, %(name)s, %(url)s, %(type)s, %(volume)s, %(country)s,
                     %(rating_pct)s, %(reviews_count)s, %(discounted)s, %(discount_pct)s,
                     %(price)s, %(old_price)s, %(available_online)s, %(available_instore)s,
@@ -88,13 +113,33 @@ def import_products(conn, json_path):
                     available_online = EXCLUDED.available_online,
                     available_instore = EXCLUDED.available_instore,
                     categories = EXCLUDED.categories;
-            """, {
-                **product,
-                "categories": Json(product.get("categories", []))
-            })
+            """, values)
+
+            if should_insert_history:
+                # Expire previous version
+                cur.execute("""
+                    UPDATE products_history
+                    SET valid_to = NOW()
+                    WHERE code_saq = %s AND valid_to IS NULL;
+                """, (code_saq,))
+
+                # Insert new version
+                cur.execute("""
+                    INSERT INTO products_history (
+                        code_saq, name, url, type, volume, country,
+                        rating_pct, reviews_count, discounted, discount_pct,
+                        price, old_price, available_online, available_instore,
+                        categories, valid_from
+                    ) VALUES (
+                        %(code_saq)s, %(name)s, %(url)s, %(type)s, %(volume)s, %(country)s,
+                        %(rating_pct)s, %(reviews_count)s, %(discounted)s, %(discount_pct)s,
+                        %(price)s, %(old_price)s, %(available_online)s, %(available_instore)s,
+                        %(categories)s, NOW()
+                    );
+                """, values)
 
     conn.commit()
-    logging.info("Finished importing products.")
+    logging.info("Finished importing products with history.")
 
 
 def import_product_details(conn, json_path):
