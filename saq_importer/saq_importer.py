@@ -7,8 +7,8 @@ from psycopg2.extras import Json
 # Database config — adjust these
 DB_CONFIG = {
     "dbname": "saq_db",
-    "user": "your_user",
-    "password": "your_password",
+    "user": "postgres",
+    "password": "testing",
     "host": "localhost",
     "port": 5432,
 }
