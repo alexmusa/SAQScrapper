@@ -2,36 +2,78 @@
 module type DB = Caqti_lwt.CONNECTION
 module T = Caqti_type
 
+(* open Lwt.Syntax
+open Yojson.Safe *)
 
+(* Define the product type *)
+type product = {
+  code_saq : string;
+  name : string;
+  url : string;
+  product_type : string;
+  volume : string;
+  country : string;
+  rating_pct : int;
+  reviews_count : int;
+  discounted : bool;
+  discount_pct : string;
+  price : float;
+  old_price : float;
+  available_online : bool;
+  available_instore : bool;
+  (* categories : Yojson.Safe.t; *)
+}
+
+let product_type : product T.t =
+  let open T in
+  let nested_tuple = 
+  (t2 (
+    t12 string string string string string string int int bool string float float) 
+    (t2 bool bool)
+  ) in
+  let encode = (fun p ->
+    Ok (( p.code_saq, p.name, p.url, p.product_type, p.volume, p.country,
+      p.rating_pct, p.reviews_count, p.discounted, p.discount_pct,
+      p.price, p.old_price), (p.available_online, p.available_instore)
+    ))
+  in
+  let decode = (fun (( code_saq, name, url, product_type, volume, country,
+                  rating_pct, reviews_count, discounted, discount_pct,
+                  price, old_price), (available_online, available_instore)) ->
+    Ok {
+      code_saq; name; url; product_type; volume; country;
+      rating_pct; reviews_count; discounted; discount_pct;
+      price; old_price; available_online; available_instore;
+    })
+  in
+  custom ~encode:encode ~decode:decode nested_tuple
+  
+
+let bleh (a : int * string) (acc : string) : string =
+let code, name = a in
+acc ^ string_of_int code ^ ": " ^ name ^ "\n"
+
+(* Queries *)
 let list_products =
   let query =
     let open Caqti_request.Infix in
     (T.unit ->* T.(t2 int string))
-    "SELECT code_saq, name FROM products LIMIT 10" in
+    "SELECT code_saq, name FROM products LIMIT 100" in
   fun (module Db : DB) ->
     let%lwt products_or_error = Db.collect_list query () in
     Caqti_lwt.or_fail products_or_error
 
-  (* let query =
-    let open Caqti_request.Infix in
-    (T.string ->. T.unit)
-    "INSERT INTO comment (text) VALUES ($1)" in
-  fun text (module Db : DB) ->
-    let%lwt unit_or_error = Db.exec query text in
-    Caqti_lwt.or_fail unit_or_error *)
-
-let retrive_single_product =
+let find_product_by_code =
   let query =
     let open Caqti_request.Infix in
-    (T.string ->* T.(t2 int string))
-    "SELECT code_saq, name FROM products WHERE code_saq = ($1) LIMIT 10" in
+    (T.string ->? product_type)
+    "SELECT code_saq, name, url, type, volume, country, rating_pct, reviews_count, \
+            discounted, discount_pct, price, old_price, available_online, available_instore
+      FROM products WHERE code_saq = ($1)"
+  in
   fun code_saq (module Db : DB) ->
-    let%lwt products_or_error = Db.collect_list query code_saq in
+    let%lwt products_or_error = Db.find_opt query code_saq in
     Caqti_lwt.or_fail products_or_error
-
-let bleh (a : int * string) (acc : string) : string =
-  let code, name = a in
-  acc ^ string_of_int code ^ ": " ^ name ^ "\n"
 
 (* GET /products *)
 let get_products = (fun request ->
@@ -41,11 +83,34 @@ let get_products = (fun request ->
 
 (* GET /products/:code_saq *)
 let get_product = (fun request ->
-  let%lwt products = 
-    Dream.sql request (retrive_single_product (Dream.param request "code_saq")) 
+  let%lwt result = 
+    Dream.sql request (find_product_by_code (Dream.param request "code_saq")) 
   in
-  let text = List.fold_right bleh products "" in
-  Dream.html text)
+  match result with
+  | Some product ->
+      Dream.json (Yojson.Safe.to_string (`Assoc [
+        "code_saq", `String product.code_saq;
+        "name", `String product.name;
+        "url", `String product.url;
+        "type", `String product.product_type;
+        "volume", `String product.volume;
+        "country", `String product.country;
+        "rating_pct", `Int product.rating_pct;
+        "reviews_count", `Int product.reviews_count;
+        "discounted", `Bool product.discounted;
+        "discount_pct", `String product.discount_pct;
+        "price", `Float product.price;
+        "old_price", `Float product.old_price;
+        "available_online", `Bool product.available_online;
+        "available_instore", `Bool product.available_instore;
+        (* "categories", Yojson.Safe.from_string product.categories; *)
+      ]))
+  | None ->
+      Dream.respond ~status:`Not_Found "Product not found"
+  (* | Error err ->
+      Dream.log "DB error: %s" (Caqti_error.show err);
+      Dream.respond ~status:`Internal_Server_Error "Internal server error" *)
+  )
 
 let () =
   (* Uncomment to use the debug error handler *)
