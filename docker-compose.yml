@@ -22,7 +22,7 @@ services:
     - "5432" # Publishes 5432 to other containers but NOT to host machine
     ports:
     - "5432:5432"
-
+    command: ["postgres", "-c", "log_statement=all"]
   # adminer:
   #   image: adminer
   #   restart: always
