@@ -74,14 +74,19 @@ let product_to_yojson p =
   ]
 
 (* Queries *)
-let list_products =
+let list_products orderBy dir =
   let query =
     let open Caqti_request.Infix in
     (T.unit ->* product_type)
-    "SELECT code_saq, name, url, type, volume, country, rating_pct, reviews_count, \
-            discounted, discount_pct, price, old_price, available_online, available_instore
-      FROM products LIMIT 10" in
-  fun (module Db : DB) ->
+    ("SELECT code_saq, name, url, type, volume, country, rating_pct, reviews_count, \
+      discounted, discount_pct, price, old_price, available_online, available_instore
+      FROM products 
+      ORDER BY " ^ orderBy ^ " " ^ dir ^ " LIMIT 10") in
+  let pattern =
+    Caqti_query.show (Caqti_request.query query Caqti_driver_info.dummy)
+  in
+  Dream.log "generated query: %s" pattern;
+  fun (module Db : DB) -> 
     let%lwt products_or_error = Db.collect_list query () in
     Caqti_lwt.or_fail products_or_error
 
@@ -99,8 +104,29 @@ let find_product_by_code =
 
 (* GET /products *)
 let get_products = (fun request ->
+  let orderBy = match Dream.query request "orderBy" with
+    | Some "code_saq" -> "code_saq"
+    | Some "name" -> "name"
+    | Some "url" -> "url"
+    | Some "product_type" -> "product_type"
+    | Some "volume" -> "volume"
+    | Some "country" -> "country"
+    | Some "rating_pct" -> "rating_pct"
+    | Some "reviews_count" -> "reviews_count"
+    | Some "discounted" -> "discounted"
+    | Some "discount_pct" -> "discount_pct"
+    | Some "price" -> "price"
+    | Some "old_price" -> "old_price"
+    | Some "available_online" -> "available_online"
+    | Some "available_instore" -> "available_instore"
+    | _ -> "price"
+  in
+  let dir = match Dream.query request "dir" with
+    | Some "asc" -> "ASC"
+    | _ -> "DESC"
+  in
   let%lwt result = 
-    Dream.sql request (list_products)
+    Dream.sql request (list_products orderBy dir)
   in
   let products = `List (List.map product_to_yojson result) in
   Dream.json (Yojson.Safe.to_string products)
