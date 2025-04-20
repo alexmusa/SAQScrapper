@@ -13,7 +13,7 @@ type product = {
   product_type : string;
   volume : string;
   country : string;
-  rating_pct : int;
+  rating_pct : int option;
   reviews_count : int;
   discounted : bool;
   discount_pct : string;
@@ -28,7 +28,7 @@ let product_type : product T.t =
   let open T in
   let nested_tuple = 
   (t2 (
-    t12 string string string string string string int int bool string float float) 
+    t12 string string string string string string (option int) int bool string float float) 
     (t2 bool bool)
   ) in
   let encode = (fun p ->
@@ -47,18 +47,40 @@ let product_type : product T.t =
     })
   in
   custom ~encode:encode ~decode:decode nested_tuple
-  
 
-let bleh (a : int * string) (acc : string) : string =
-let code, name = a in
-acc ^ string_of_int code ^ ": " ^ name ^ "\n"
+let int_or_null bleh =
+  match bleh with
+  | Some i -> `Int i
+  | None -> `Null
+
+let product_to_yojson p =
+  `Assoc [
+    "code_saq", `String p.code_saq;
+    "name", `String p.name;
+    "url", `String p.url;
+    "type", `String p.product_type;
+    "volume", `String p.volume;
+    "country", `String p.country;
+    "rating_pct", int_or_null p.rating_pct;
+    "reviews_count", `Int p.reviews_count;
+    "discounted", `Bool p.discounted;
+    "discount_pct", `String p.discount_pct;
+    "price", `Float p.price;
+    "old_price", `Float p.old_price;
+    "available_online", `Bool p.available_online;
+    "available_instore", `Bool p.available_instore;
+    (* "categories", p.categories; *)
+    (* "categories", Yojson.Safe.from_string product.categories; *)
+  ]
 
 (* Queries *)
 let list_products =
   let query =
     let open Caqti_request.Infix in
-    (T.unit ->* T.(t2 int string))
-    "SELECT code_saq, name FROM products LIMIT 100" in
+    (T.unit ->* product_type)
+    "SELECT code_saq, name, url, type, volume, country, rating_pct, reviews_count, \
+            discounted, discount_pct, price, old_price, available_online, available_instore
+      FROM products LIMIT 10" in
   fun (module Db : DB) ->
     let%lwt products_or_error = Db.collect_list query () in
     Caqti_lwt.or_fail products_or_error
@@ -77,9 +99,12 @@ let find_product_by_code =
 
 (* GET /products *)
 let get_products = (fun request ->
-  let%lwt products = Dream.sql request list_products in
-  let text = List.fold_right bleh products "" in
-  Dream.html text)
+  let%lwt result = 
+    Dream.sql request (list_products)
+  in
+  let products = `List (List.map product_to_yojson result) in
+  Dream.json (Yojson.Safe.to_string products)
+  )
 
 (* GET /products/:code_saq *)
 let get_product = (fun request ->
@@ -88,23 +113,7 @@ let get_product = (fun request ->
   in
   match result with
   | Some product ->
-      Dream.json (Yojson.Safe.to_string (`Assoc [
-        "code_saq", `String product.code_saq;
-        "name", `String product.name;
-        "url", `String product.url;
-        "type", `String product.product_type;
-        "volume", `String product.volume;
-        "country", `String product.country;
-        "rating_pct", `Int product.rating_pct;
-        "reviews_count", `Int product.reviews_count;
-        "discounted", `Bool product.discounted;
-        "discount_pct", `String product.discount_pct;
-        "price", `Float product.price;
-        "old_price", `Float product.old_price;
-        "available_online", `Bool product.available_online;
-        "available_instore", `Bool product.available_instore;
-        (* "categories", Yojson.Safe.from_string product.categories; *)
-      ]))
+      Dream.json (Yojson.Safe.to_string (product_to_yojson product))
   | None ->
       Dream.respond ~status:`Not_Found "Product not found"
   (* | Error err ->
@@ -124,10 +133,6 @@ let () =
       (fun request ->
         Dream.log "Sending greeting to %s!" (Dream.client request);
         Dream.html "Good morning, world!");
-
-    Dream.get "/echo/:word"
-      (fun request ->
-        Dream.html (Dream.param request "word"));
 
     Dream.get "/products" get_products;
 
