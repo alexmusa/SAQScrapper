@@ -162,10 +162,10 @@ let cors_middleware = make_cors allow_wildcard_conf
 
 let add_header inner_handler request =
   let rep : Dream.response Lwt.t = inner_handler request in
-  let%lwt bleh = rep in
-  Dream.add_header bleh "Access-Control-Allow-Origin" "*"; 
-  Utils.print_all_headers bleh;
-  Lwt.return bleh
+  let%lwt rep = rep in
+  Dream.add_header rep "Access-Control-Allow-Origin" "*"; 
+  Utils.print_all_headers rep;
+  Lwt.return rep
 
 let () =
   (* Uncomment to use the debug error handler *)
