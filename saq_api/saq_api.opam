@@ -6,6 +6,7 @@ depends: [
   "dream"
   "dune" {>= "2.0.0"}
   "ppx_yojson_conv"
+  "dream_middleware_ext"
 ]
 
 synopsis: "API to expose information on SAQ products"

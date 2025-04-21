@@ -1,4 +1,4 @@
 (executable
  (name server)
- (libraries caqti-driver-postgresql  dream)
+ (libraries caqti-driver-postgresql  dream dream_middleware_ext)
  (preprocess (pps lwt_ppx ppx_yojson_conv)))

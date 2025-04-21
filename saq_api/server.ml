@@ -147,14 +147,45 @@ let get_product = (fun request ->
       Dream.respond ~status:`Internal_Server_Error "Internal server error" *)
   )
 
+open Dream_middleware_ext.Cors
+
+(* allow all verb headers *)
+let all_verb_headers = all_verbs_header ()
+
+(* make conf: allow wildcard origin *)
+let allow_wildcard_conf =
+  make_cors_conf ~allowed_origin:WildCard ~allowed_methods:all_verb_headers
+    ~allowed_headers:[ "X-Requested-With" ] ~expose_headers:[ "GET" ] ()
+
+(* make allow wildcard middle or with other confs *)
+let cors_middleware = make_cors allow_wildcard_conf
+
+(* BEGIN *)
+let printheader (header: (string * string)) =
+  let a, b = header in
+  Dream.log "%s : %s" a b
+
+let logallheaders req =
+  List.iter printheader (Dream.all_headers req)
+(* END *)
+
+let add_header inner_handler request =
+  let blah : Dream.response Lwt.t = inner_handler request in
+  let%lwt bleh = blah in
+  Dream.add_header bleh "Access-Control-Allow-Origin" "*"; 
+  logallheaders bleh;
+  Lwt.return bleh
+
 let () =
   (* Uncomment to use the debug error handler *)
   (* Dream.run ~error_handler:Dream.debug_error_handler *)
   Dream.run
+  @@ cors_middleware (* should apply CORS middileware at outmost level*)
+  @@ add_header
   @@ Dream.logger
   @@ Dream.sql_pool "postgresql://postgres:testing@localhost/saq_db"
   @@ Dream.router [
-
+  
     Dream.get "/"
       (fun request ->
         Dream.log "Sending greeting to %s!" (Dream.client request);
