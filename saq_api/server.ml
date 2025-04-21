@@ -160,20 +160,11 @@ let allow_wildcard_conf =
 (* make allow wildcard middle or with other confs *)
 let cors_middleware = make_cors allow_wildcard_conf
 
-(* BEGIN *)
-let printheader (header: (string * string)) =
-  let a, b = header in
-  Dream.log "%s : %s" a b
-
-let logallheaders req =
-  List.iter printheader (Dream.all_headers req)
-(* END *)
-
 let add_header inner_handler request =
-  let blah : Dream.response Lwt.t = inner_handler request in
-  let%lwt bleh = blah in
+  let rep : Dream.response Lwt.t = inner_handler request in
+  let%lwt bleh = rep in
   Dream.add_header bleh "Access-Control-Allow-Origin" "*"; 
-  logallheaders bleh;
+  Utils.print_all_headers bleh;
   Lwt.return bleh
 
 let () =
