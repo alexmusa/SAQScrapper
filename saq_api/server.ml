@@ -4,6 +4,7 @@ module T = Caqti_type
 
 (* open Lwt.Syntax
 open Yojson.Safe *)
+open Dream_middleware_ext.Cors
 
 (* Define the product type *)
 type product = {
@@ -147,8 +148,6 @@ let get_product = (fun request ->
       Dream.respond ~status:`Internal_Server_Error "Internal server error" *)
   )
 
-open Dream_middleware_ext.Cors
-
 (* allow all verb headers *)
 let all_verb_headers = all_verbs_header ()
 
@@ -160,19 +159,11 @@ let allow_wildcard_conf =
 (* make allow wildcard middle or with other confs *)
 let cors_middleware = make_cors allow_wildcard_conf
 
-let add_header inner_handler request =
-  let rep : Dream.response Lwt.t = inner_handler request in
-  let%lwt rep = rep in
-  Dream.add_header rep "Access-Control-Allow-Origin" "*"; 
-  Utils.print_all_headers rep;
-  Lwt.return rep
-
 let () =
   (* Uncomment to use the debug error handler *)
   (* Dream.run ~error_handler:Dream.debug_error_handler *)
   Dream.run
   @@ cors_middleware (* should apply CORS middileware at outmost level*)
-  @@ add_header
   @@ Dream.logger
   @@ Dream.sql_pool "postgresql://postgres:testing@localhost/saq_db"
   @@ Dream.router [
