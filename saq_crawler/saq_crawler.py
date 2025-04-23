@@ -303,9 +303,10 @@ def save_all_category_tree_pages(tree, save_dir="run"):
 
         save_all_category_tree_pages(category['subcategories'], save_dir)
 
-def parse_all_saved_pages(base_dir="run", output_file="products.json"):
+def parse_all_saved_pages(save_dir="run", output_file="products.json"):
+    # TODO: Do breadth first travesal and only keep the most nested category
     all_products = {}
-    page_files = glob.glob(os.path.join(base_dir, "**", "*_p*.html"), recursive=True)
+    page_files = glob.glob(os.path.join(save_dir, "**", "*_p*.html"), recursive=True)
     logging.info(f"Found {len(page_files)} category page files to parse.")
 
     for page_file in page_files:
@@ -315,7 +316,7 @@ def parse_all_saved_pages(base_dir="run", output_file="products.json"):
                 html_content = f.read()
                 
                 # Get relative path and extract categories
-                rel_path = os.path.relpath(page_file, base_dir)
+                rel_path = os.path.relpath(page_file, save_dir)
                 path_parts = rel_path.split(os.sep)[1:-1]  # skip file name
                 categories = [part for part in path_parts if part and not part.startswith("p=")]
 
@@ -330,14 +331,14 @@ def parse_all_saved_pages(base_dir="run", output_file="products.json"):
         except Exception as e:
             logging.error(f"Failed to parse {page_file}: {e}")
 
-    output_path = os.path.join(base_dir, output_file)
+    output_path = os.path.join(save_dir, output_file)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(all_products, f, ensure_ascii=False, indent=2)
 
     logging.info(f"Saved {len(all_products)} products to {output_path}")
     return all_products
 
-def fetch_all_product_details(products, base_dir="run", details_dir="run/details"):
+def fetch_all_product_details(products, details_dir="run/details"):
     """Fetch and save all product detail pages."""
     os.makedirs(details_dir, exist_ok=True)
 
@@ -392,25 +393,51 @@ def parse_all_product_details(details_dir="run/details", output_file="product_de
 
 
 if __name__ == "__main__":
-    save_dir = "run"
+    save_dir = "run/02"
     setup_logging(save_dir)
     main_url = f"{BASE_URL}/fr/produits"
 
-    logging.info("Starting category parsing...")
-    tree = parse_categories_recursively(main_url, save_dir=save_dir)
-    save_category_tree_json(tree, save_dir=save_dir)
+    # PATHS
+    c_save_dir = os.path.join(save_dir, "categories")
+    tree_path = os.path.join(c_save_dir, "category_tree.json")
+
+    i_save_dir = os.path.join(save_dir, "info")
+    products_path = os.path.join(i_save_dir, "products.json")
+
+    d_save_dir = os.path.join(save_dir, "details")
+    details_path = os.path.join(d_save_dir, "product_details.json")
+
+    # Load or parse category tree
+    if os.path.exists(tree_path):
+        logging.info(f"Loading category tree from {tree_path}")
+        with open(tree_path, "r", encoding="utf-8") as f:
+            tree = json.load(f)
+    else:
+        logging.info(f"Parsing category tree in {c_save_dir}")
+        tree = parse_categories_recursively(main_url, save_dir=c_save_dir)
+        save_category_tree_json(tree, save_dir=c_save_dir)
 
     print("SAQ Category Tree:")
     print_category_tree(tree)
 
-    logging.info("Retrieving all products...")
-    save_all_category_tree_pages(tree)
-    
-    logging.info("Parsing all products...")
-    products = parse_all_saved_pages()
+    # Load or parse product infos
+    if os.path.exists(products_path):
+        logging.info(f"Loading products from {products_path}")
+        with open(products_path, "r", encoding="utf-8") as f:
+            products = json.load(f)
+    else:
+        logging.info("Retrieving all products...")
+        save_all_category_tree_pages(tree, save_dir=i_save_dir)
+        logging.info("Parsing all products...")
+        products = parse_all_saved_pages(save_dir=i_save_dir)
 
-    logging.info("Fetching all products details...")
-    fetch_all_product_details(products)
-
-    logging.info("Parsing all products details...")
-    parse_all_product_details()
+    # Load or fetch + parse product details
+    if os.path.exists(details_path):
+        logging.info(f"Loading product details from {details_path}")
+        with open(details_path, "r", encoding="utf-8") as f:
+            product_details = json.load(f)
+    else:
+        logging.info("Fetching all products details...")
+        fetch_all_product_details(products, details_dir=d_save_dir)
+        logging.info("Parsing all products details...")
+        product_details = parse_all_product_details(details_dir=d_save_dir)
