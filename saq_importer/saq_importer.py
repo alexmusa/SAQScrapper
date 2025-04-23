@@ -31,6 +31,28 @@ def connect_db():
 
 def create_tables(conn):
     with conn.cursor() as cur:
+        # 1) the “current” products table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS products (
+                code_saq           TEXT        PRIMARY KEY,
+                name               TEXT,
+                url                TEXT,
+                type               TEXT,
+                volume             TEXT,
+                country            TEXT,
+                rating_pct         INTEGER,
+                reviews_count      INTEGER,
+                discounted         BOOLEAN,
+                discount_pct       TEXT,
+                price              REAL,
+                old_price          REAL,
+                available_online   BOOLEAN,
+                available_instore  BOOLEAN,
+                categories         JSONB
+            );
+        """)
+
+        # 2) history of every change
         cur.execute("""
             CREATE TABLE IF NOT EXISTS products_history (
                 code_saq TEXT,
@@ -49,16 +71,19 @@ def create_tables(conn):
                 available_instore BOOLEAN,
                 categories JSONB,
                 valid_from TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                valid_to TIMESTAMPTZ,
+                valid_to   TIMESTAMPTZ,
                 PRIMARY KEY (code_saq, valid_from)
             );
         """)
+
+        # 3) extended attributes
         cur.execute("""
             CREATE TABLE IF NOT EXISTS product_attributes (
-                code_saq TEXT PRIMARY KEY,
+                code_saq   TEXT    PRIMARY KEY,
                 attributes JSONB
             );
         """)
+
         conn.commit()
 
 
